@@ -338,7 +338,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     const stylePath = path.join(this.props.themePath, 'style.scss');
     fs.ensureFileAsync(stylePath)
     .then(() => {
-      opn(stylePath);
+      opn(stylePath).catch(err => undefined);
     });
   }
 
