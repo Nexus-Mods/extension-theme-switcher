@@ -21,14 +21,14 @@
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
     "copyfiles": "^1.2.0",
-    "electron-rebuild": "^1.5.11",
+    "electron-rebuild": "^1.7.3",
     "webpack": "^1.13.2"
   },
   "dependencies": {
     "font-manager": "^0.2.2",
-    "vortex-api": "Nexus-Mods/vortex-api",
     "react-bootstrap": "^0.31.0",
     "react-color": "^2.12.1",
-    "redux": "^3.6.0"
+    "redux": "^3.6.0",
+    "vortex-api": "Nexus-Mods/vortex-api"
   }
 }
