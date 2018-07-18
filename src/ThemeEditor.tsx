@@ -1,11 +1,10 @@
 import { TranslationFunction } from 'i18next';
-import opn = require('opn');
 import * as path from 'path';
 import * as React from 'react';
 import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
   Grid, OverlayTrigger, Panel, Popover, Row } from 'react-bootstrap';
-import { ChromePicker, Color } from 'react-color';
-import { ComponentEx, fs, More, Toggle } from 'vortex-api';
+import { ChromePicker } from 'react-color';
+import { ComponentEx, fs, More, Toggle, util } from 'vortex-api';
 
 interface IColor {
   r: number;
@@ -337,9 +336,8 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   private editManually = () => {
     const stylePath = path.join(this.props.themePath, 'style.scss');
     fs.ensureFileAsync(stylePath)
-    .then(() => {
-      opn(stylePath).catch(err => undefined);
-    });
+    .then(() =>
+      (util as any).opn(stylePath).catch(err => undefined));
   }
 
   private revert = () => {
