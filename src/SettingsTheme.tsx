@@ -3,7 +3,6 @@ import ThemeEditor from './ThemeEditor';
 import { themePath } from './util';
 
 import * as Promise from 'bluebird';
-import { remote } from 'electron';
 import * as fontManager from 'font-manager';
 import * as path from 'path';
 import * as React from 'react';
@@ -150,7 +149,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     const { t } = this.props;
     // consider all directories in the theme directory as themes
     return fs.readdirAsync(basePath)
-      .filter<string>(fileName =>
+      .filter(fileName =>
         fs.statAsync(path.join(basePath, fileName))
           .then(stat => stat.isDirectory()))
       .catch(err => {
