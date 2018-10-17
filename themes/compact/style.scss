@@ -57,3 +57,35 @@
     overflow-x: hidden;
     text-overflow: ellipsis;
 }
+
+.toolbar-app-region .container-quicklaunch .tool-icon-container {
+    width: 200px;
+    height: 52px;
+}
+
+.container-quicklaunch .tool-icon-container {
+    height: 52px;
+}
+
+#main-toolbar.toolbar-app-region {
+    height: unset;
+}
+
+#main-toolbar.toolbar-app-region .main-toolbar-right {
+    margin-bottom: auto;
+    margin-right: 146px;
+    border-right: $border-width solid $border-color;
+}
+
+#main-toolbar .nexus-main-banner div {
+    font-size: xx-small;
+}
+
+#main-toolbar .nexus-main-banner div:first-child {
+    font-size: 1.4em;
+    margin-bottom: 0;
+}
+
+#main-toolbar .nexus-main-banner .right-center {
+    font-size: inherit;
+}
