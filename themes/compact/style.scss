@@ -1,0 +1,59 @@
+// reduce paddings
+.nav-tabs > li > a {
+    padding: 2px 16px;
+}
+
+.xtable > .xtbody > .xtr > .xtd {
+    padding: 0.25rem 0.75rem;
+}
+
+// show only icons on the toolbars unless the mouse cursor is hovered on them
+.menubar {
+    height: initial;
+}
+
+.menubar:hover {
+    height: 48px;
+}
+
+.menubar:hover .button-text {
+    display: flex;
+}
+
+.menubar .button-text {
+    display: none;
+}
+
+// if the sidebar is collapsed, show the tab name when hovering
+// (this conflicts a bit with the tooltip which we can't disable from css)
+#main-nav-sidebar.sidebar-compact #main-nav-container {
+    overflow: visible;
+    z-index: 3;
+}
+
+.sidebar-compact .nav-pills > li > a {
+    overflow: visible;
+}
+
+.sidebar-compact .main-nav-group > li:hover a::after {
+    content: attr(title);
+    background-color: $brand-bg;
+    margin-left: 8px;
+    padding: 8px 8px;
+    border: $border-width solid $border-color;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    display: flex;
+    align-items: center;
+}
+
+// category names can be very long and force a line break.
+// instead, limit the width and display ellipsis as necessary
+.xtd .table-mods .cell-category {
+    white-space: nowrap;
+    max-width: 20em;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
