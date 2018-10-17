@@ -51,7 +51,7 @@
 
 // category names can be very long and force a line break.
 // instead, limit the width and display ellipsis as necessary
-.xtd .table-mods .cell-category {
+.xtd.table-mods.cell-category {
     white-space: nowrap;
     max-width: 20em;
     overflow-x: hidden;
