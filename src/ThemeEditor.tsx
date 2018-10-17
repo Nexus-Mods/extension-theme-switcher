@@ -109,7 +109,7 @@ const colorDefaults: IColorEntry[] = [
   { name: 'brand-highlight', value: '#00C1FF' },
   { name: 'brand-success', value: '#86B951' },
   { name: 'brand-info', value: '#00C1FF' },
-  { name: 'brand-warning', value: '#FFB126' },
+  { name: 'brand-warning', value: '#FF7300' },
   { name: 'brand-danger', value: '#FF1C38' },
   { name: 'brand-bg', value: '#2A2C2B' },
   { name: 'brand-menu', value: '#4C4C4C' },
