@@ -8,19 +8,20 @@
 }
 
 // show only icons on the toolbars unless the mouse cursor is hovered on them
-.menubar {
-    height: initial;
+.mainpage-header .menubar {
+    height: 24px;
+    transition: height 100ms;
 }
 
-.menubar:hover {
+.mainpage-header .menubar:hover {
     height: 48px;
 }
 
-.menubar:hover .button-text {
+.mainpage-header .menubar:hover .button-text {
     display: flex;
 }
 
-.menubar .button-text {
+.mainpage-header .menubar .button-text {
     display: none;
 }
 
