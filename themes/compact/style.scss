@@ -8,21 +8,27 @@
 }
 
 // show only icons on the toolbars unless the mouse cursor is hovered on them
-.mainpage-header .menubar {
+.mainpage-header {
     height: 24px;
-    transition: height 100ms;
+    transition: height 500ms;
+    .menubar {
+      height: initial;
+    }
 }
 
-.mainpage-header .menubar:hover {
-    height: 48px;
+.mainpage-header:hover {
+    height: 62px;
 }
 
-.mainpage-header .menubar:hover .button-text {
-    display: flex;
+.mainpage-header:hover .button-text {
+    max-height: 5em;
+    opacity: 1;
 }
 
-.mainpage-header .menubar .button-text {
-    display: none;
+.mainpage-header .button-text {
+    max-height: 0;
+    opacity: 0;
+    transition: opacity 500ms ease 0s, max-height 500ms ease;
 }
 
 // if the sidebar is collapsed, show the tab name when hovering
