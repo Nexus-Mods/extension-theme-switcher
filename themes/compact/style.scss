@@ -9,26 +9,25 @@
 
 // show only icons on the toolbars unless the mouse cursor is hovered on them
 .mainpage-header {
-    height: 24px;
+    height: 32px !important;
     transition: height 500ms;
     .menubar {
-      height: initial;
+      height: 100%;
     }
 }
 
 .mainpage-header:hover {
-    height: 62px;
+    height: 64px !important;
+    transition: height 500ms ease;
 }
 
 .mainpage-header:hover .button-text {
-    max-height: 5em;
     opacity: 1;
 }
 
 .mainpage-header .button-text {
-    max-height: 0;
     opacity: 0;
-    transition: opacity 500ms ease 0s, max-height 500ms ease;
+    transition: opacity 500ms ease;
 }
 
 // if the sidebar is collapsed, show the tab name when hovering
