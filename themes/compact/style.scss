@@ -10,7 +10,7 @@
 // show only icons on the toolbars unless the mouse cursor is hovered on them
 .mainpage-header {
     height: 32px !important;
-    transition: height 500ms;
+    transition: height 500ms ease 500ms;
     .menubar {
       height: 100%;
     }
@@ -23,6 +23,7 @@
 
 .mainpage-header:hover .button-text {
     opacity: 1;
+    transition: opacity 500ms ease 500ms;
 }
 
 .mainpage-header .button-text {
