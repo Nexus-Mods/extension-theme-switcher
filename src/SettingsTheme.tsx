@@ -163,10 +163,16 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   private saveTheme = (variables: { [name: string]: string }) => {
+    const { t } = this.props;
     this.saveThemeInternal(this.props.currentTheme, variables)
     .then(() => {
       this.context.api.events.emit('select-theme', this.props.currentTheme);
-    });
+    })
+    .catch(err => this.context.api.showErrorNotification(t('Unable to save theme'), err, 
+      // Theme directory should have been present at this point but was removed
+      //  by an external factor. This could be due to:
+      // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
+      { allowReport: (err as any).code !== 'ENOENT' }));
   }
 
   private saveThemeInternal(themeName: string, variables: { [name: string]: string }) {
@@ -227,7 +233,11 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           .then(() => {
             this.nextState.themes.push(res.input.name);
             this.selectThemeImpl(res.input.name);
-          });
+          })
+          .catch(err => this.context.api.showErrorNotification(t('Failed to read theme directory'), err, 
+            // Theme directory has been removed by an external method -
+            // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
+            { allowReport: (err as any).code !== 'ENOENT' }));
         } else {
           this.clone(t('Name already used.'));
         }
