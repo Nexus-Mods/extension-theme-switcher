@@ -49,10 +49,10 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   public componentWillMount() {
     let bundled: string[];
-    this.readThemes(path.join(__dirname, 'themes'))
+    this.readThemes(this.bundledPath)
       .then(bundledThemes => {
         bundled = bundledThemes
-        .map(name => '__' + name);
+          .map(name => '__' + name);
         return this.readThemes(themePath());
       })
       .then(customThemes => {
@@ -141,6 +141,10 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     return <option key={key} value={key}>{renderName}</option>;
   }
 
+  private get bundledPath(): string {
+    return path.join(__dirname, 'themes');
+  }
+
   private refresh = () => {
     this.context.api.events.emit('select-theme', this.props.currentTheme);
   }
@@ -212,7 +216,9 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     const { t, currentTheme, onShowDialog } = this.props;
     const { themes } = this.state;
 
-    const theme = currentTheme.startsWith('__')
+    const isBundled: boolean = currentTheme.startsWith('__');
+
+    const theme = isBundled
       ? currentTheme.slice(2)
       : currentTheme;
 
@@ -227,17 +233,20 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     .then(res => {
       if (res.action === 'Clone') {
         if (res.input.name && (themes.indexOf(res.input.name) === -1)) {
-          const targetDir = path.join(themePath(), res.input.name);
-          return fs.ensureDirAsync(targetDir)
-          .then(() => this.saveThemeInternal(res.input.name, this.state.variables))
-          .then(() => {
-            this.nextState.themes.push(res.input.name);
-            this.selectThemeImpl(res.input.name);
-          })
-          .catch(err => this.context.api.showErrorNotification(t('Failed to read theme directory'), err, 
-            // Theme directory has been removed by an external method -
-            // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
-            { allowReport: (err as any).code !== 'ENOENT' }));
+          const targetPath = path.join(themePath(), res.input.name);
+          const sourcePath = path.join(isBundled ? this.bundledPath : themePath(), theme);
+          return fs.ensureDirAsync(targetPath)
+            .then(() => this.saveThemeInternal(res.input.name, this.state.variables))
+            .then(() => fs.readdirAsync(sourcePath))
+            .map(files => fs.copyAsync(path.join(sourcePath, files), path.join(targetPath, files)))
+            .then(() => {
+              this.nextState.themes.push(res.input.name);
+              this.selectThemeImpl(res.input.name);
+            })
+            .catch(err => this.context.api.showErrorNotification(t('Failed to read theme directory'), err, 
+              // Theme directory has been removed by an external method -
+              // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
+              { allowReport: (err as any).code !== 'ENOENT' }));
         } else {
           this.clone(t('Name already used.'));
         }
@@ -252,7 +261,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       throw new Error('invalid theme');
     }
     onShowDialog('question', t('Confirm removal'), {
-      message: t('Are you sure you want to remove the theme {{theme}}', {
+      text: t('Are you sure you want to remove the theme {{theme}}', {
         replace: { theme: currentTheme },
       }),
     }, [
