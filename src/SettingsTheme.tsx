@@ -6,7 +6,7 @@ import * as Promise from 'bluebird';
 import * as fontManager from 'font-manager';
 import * as path from 'path';
 import * as React from 'react';
-import { Button, ControlLabel, FormControl, FormGroup, InputGroup } from 'react-bootstrap';
+import { Button, ControlLabel, FormControl, FormGroup, InputGroup, Alert } from 'react-bootstrap';
 import { translate } from 'react-i18next';
 import { connect } from 'react-redux';
 import * as Redux from 'redux';
@@ -108,18 +108,21 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
                   : null}
               </InputGroup.Button>
             </InputGroup>
+            {editable ? null : (
+              <Alert bsStyle='info'>
+                {t('Bundled themes can\'t be modified directly, please clone one to edit.')}
+              </Alert>
+            )}
           </FormGroup>
         </form>
-        { editable
-            ? (
-              <ThemeEditor
-                t={t}
-                themePath={path.join(themePath(), this.props.currentTheme)}
-                theme={variables}
-                onApply={this.saveTheme}
-                availableFonts={availableFonts}
-              />
-            ) : null }
+        <ThemeEditor
+          t={t}
+          themePath={path.join(themePath(), this.props.currentTheme)}
+          theme={variables}
+          onApply={this.saveTheme}
+          availableFonts={availableFonts}
+          disabled={!editable}
+        />
         { editable
             ? (
               <tooltip.IconButton

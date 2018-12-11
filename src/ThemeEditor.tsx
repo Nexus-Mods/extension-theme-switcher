@@ -16,6 +16,7 @@ interface IColor {
 interface IColorProps {
   name: string;
   color: IColor;
+  disabled: boolean;
   onUpdateColor: (name: string, colorHex: string) => void;
 }
 
@@ -60,7 +61,7 @@ function renderColorBox(color: IColor): JSX.Element {
 
 class ColorPreview extends React.Component<IColorProps, {}> {
   public render(): JSX.Element {
-    const { color } = this.props;
+    const { color, disabled } = this.props;
     const popover = (
       <Popover
         id='color-preview'
@@ -73,12 +74,16 @@ class ColorPreview extends React.Component<IColorProps, {}> {
       </Popover>
     );
 
-    return (
+    const content = (
+      <div>
+        {colorToHex(color)}
+        {renderColorBox(color)}
+      </div>
+    );
+
+    return disabled ? content : (
       <OverlayTrigger trigger='click' rootClose placement='top' overlay={popover}>
-        <div>
-          {colorToHex(color)}
-          {renderColorBox(color)}
-        </div>
+        {content}
       </OverlayTrigger>
     );
   }
@@ -99,6 +104,7 @@ export interface IBaseProps {
   availableFonts: string[];
   themePath: string;
   theme: { [name: string]: string };
+  disabled: boolean;
   onApply: (updatedTheme: { [name: string]: string }) => void;
 }
 
@@ -171,9 +177,10 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   public render(): JSX.Element {
-    const { t, availableFonts } = this.props;
+    const { t, availableFonts, disabled } = this.props;
     const { colors, dark, fontFamily, fontFamilyHeadings,
-            fontSize, hidpiScale, margin } = this.state;
+            fontSize, margin } = this.state;
+
     const buckets: IColorEntry[][] = colorDefaults.reduce((prev, value, idx) => {
       if (idx < ThemeEditor.BUCKETS) {
         prev[idx % ThemeEditor.BUCKETS] = [];
@@ -183,7 +190,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     }, new Array(ThemeEditor.BUCKETS));
     return (
       <div>
-        <Form horizontal>
+        <Form disabled={disabled} horizontal>
           <FormGroup>
             <Col sm={4}>
               <ControlLabel>{t('Font Size:')} {fontSize}</ControlLabel>
@@ -195,6 +202,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
                 min={8}
                 max={24}
                 onChange={this.onChangeFontSize}
+                disabled={disabled}
               />
             </Col>
           </FormGroup>
@@ -225,6 +233,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
                 min={0}
                 max={80}
                 onChange={this.onChangeMargin}
+                disabled={disabled}
               />
             </Col>
           </FormGroup>
@@ -237,8 +246,9 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
                 componentClass='select'
                 onChange={this.onChangeFontFamily}
                 value={fontFamily}
+                disabled={disabled}
               >
-              {availableFonts.map(this.renderFontOption)}
+                {availableFonts.map(this.renderFontOption)}
               </FormControl>
             </Col>
           </FormGroup>
@@ -258,8 +268,9 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
                 componentClass='select'
                 onChange={this.onChangeFontFamilyHeadings}
                 value={fontFamilyHeadings}
+                disabled={disabled}
               >
-              {availableFonts.map(this.renderFontOption)}
+                {availableFonts.map(this.renderFontOption)}
               </FormControl>
             </Col>
           </FormGroup>
@@ -294,7 +305,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
             </Grid>
           </div>
         </Panel>
-        <Toggle checked={dark} onToggle={this.onChangeDark}>
+        <Toggle checked={dark} onToggle={this.onChangeDark} disabled={disabled}>
           {t('Dark Theme')}
           <More id='more-dark-theme' name={t('Dark Theme')}>
             {t('When this is enabled, grays are essentially inverted, so a light gray becomes '
@@ -303,16 +314,19 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
               + 'will produce better contrast.')}
           </More>
         </Toggle>
-        <a onClick={this.editManually}>{t('Edit CSS manually...')}</a>
-        <div className='pull-right'>
-          <Button bsStyle='primary' onClick={this.revert}>{t('Revert')}</Button>
-          <Button bsStyle='primary' onClick={this.apply}>{t('Apply')}</Button>
-        </div>
+        {disabled ? null : <a onClick={this.editManually}>{t('Edit CSS manually...')}</a>}
+        {disabled ? null : (
+          <div className='pull-right'>
+            <Button bsStyle='primary' onClick={this.revert}>{t('Revert')}</Button>
+            <Button bsStyle='primary' onClick={this.apply}>{t('Apply')}</Button>
+          </div>
+        )}
       </div>
     );
   }
 
   private renderEntry = (entry: IColorEntry, value: string) => {
+    const { disabled } = this.props;
     return (
       <Col key={entry.name} sm={4} md={4} lg={4} style={{ display: 'inline-flex' }}>
         <span style={{ marginRight: 'auto' }}>{entry.name}</span>
@@ -320,6 +334,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
           name={entry.name}
           color={colorFromHex(value || entry.value)}
           onUpdateColor={this.updateColor}
+          disabled={disabled}
         />
       </Col>
     );
@@ -334,6 +349,9 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private editManually = () => {
+    if (this.props.disabled) {
+      return;
+    }
     const stylePath = path.join(this.props.themePath, 'style.scss');
     fs.ensureFileAsync(stylePath)
     .then(() =>
