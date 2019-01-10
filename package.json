@@ -6,7 +6,6 @@
   "scripts": {
     "tsc": "tsc -p .",
     "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --display-error-details --progress --profile --color",
-    "postinstall": "electron-rebuild -w font-manager -t prod,dev",
     "copy_lib": "copyfiles -u 4 node_modules/font-manager/build/Release/fontmanager.node dist",
     "copy_themes": "copyfiles themes/**/* dist",
     "build": "npm run tsc && npm run webpack && npm run copy_lib && npm run copy_themes && extractInfo"
@@ -21,7 +20,6 @@
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
     "copyfiles": "^1.2.0",
-    "electron-rebuild": "^1.7.3",
     "webpack": "^1.13.2"
   },
   "dependencies": {
