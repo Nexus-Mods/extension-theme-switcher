@@ -3,7 +3,7 @@ import ThemeEditor from './ThemeEditor';
 import { themePath } from './util';
 
 import * as Promise from 'bluebird';
-import * as fontManager from 'font-manager';
+import * as fontManager from 'font-scanner';
 import * as path from 'path';
 import * as React from 'react';
 import { Button, ControlLabel, FormControl, FormGroup, InputGroup, Alert } from 'react-bootstrap';
@@ -11,6 +11,8 @@ import { translate } from 'react-i18next';
 import { connect } from 'react-redux';
 import * as Redux from 'redux';
 import { actions, ComponentEx, fs, log, tooltip, types } from 'vortex-api';
+
+const getAvailableFontsAsync = Promise.promisify(fontManager.getAvailableFonts);
 
 interface IConnectedProps {
   currentTheme: string;
@@ -69,10 +71,10 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       })
       .then((fonts: any[]) => {
         this.nextState.availableFonts = Array.from(new Set<string>(
-              [
-                'Roboto',
-                'BebasNeue',
-                ...fonts.map(font => font.family).sort(),
+          [
+            'Roboto',
+            'BebasNeue',
+            ...fonts.map(font => font.family).sort(),
           ]));
       });
   }
@@ -85,7 +87,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   public render(): JSX.Element {
-    const { t, currentTheme } = this.props;
+    const { t, currentTheme, onShowDialog } = this.props;
     const { availableFonts, editable, variables } = this.state;
     return (
       <div style={{ position: 'relative' }}>
@@ -121,6 +123,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           onApply={this.saveTheme}
           availableFonts={availableFonts}
           disabled={!editable}
+          onShowDialog={onShowDialog}
         />
         { editable
             ? (

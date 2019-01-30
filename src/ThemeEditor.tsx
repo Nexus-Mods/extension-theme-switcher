@@ -1,10 +1,11 @@
+import * as Promise from 'bluebird';
 import { TranslationFunction } from 'i18next';
 import * as path from 'path';
 import * as React from 'react';
 import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
   Grid, OverlayTrigger, Panel, Popover, Row } from 'react-bootstrap';
 import { ChromePicker } from 'react-color';
-import { ComponentEx, fs, More, Toggle, util } from 'vortex-api';
+import { ComponentEx, fs, log, More, Toggle, util, types } from 'vortex-api';
 
 interface IColor {
   r: number;
@@ -106,6 +107,12 @@ export interface IBaseProps {
   theme: { [name: string]: string };
   disabled: boolean;
   onApply: (updatedTheme: { [name: string]: string }) => void;
+  onShowDialog: (
+    type: types.DialogType,
+    title: string,
+    content: types.IDialogContent,
+    actions: types.DialogActions,
+  ) => Promise<types.IDialogResult>;
 }
 
 type IProps = IBaseProps;
@@ -349,13 +356,28 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private editManually = () => {
-    if (this.props.disabled) {
+    const { disabled, onShowDialog, themePath } = this.props;
+    if (disabled) {
       return;
     }
-    const stylePath = path.join(this.props.themePath, 'style.scss');
+    const stylePath = path.join(themePath, 'style.scss');
     fs.ensureFileAsync(stylePath)
-    .then(() =>
-      (util as any).opn(stylePath).catch(err => undefined));
+      .then(() =>
+        (util as any).opn(stylePath)
+          .catch((util as any).MissingInterpreter, (err) => {
+            onShowDialog('error', 'No handler found', {
+              text: 'You don\'t have an editor associated with scss files. '
+                  + 'You can fix this by opening the following file from your file explorer, pick your '
+                  + 'favorite text editor and when prompted, choose to always open that file type '
+                  + 'with that editor.',
+              message: err.url,
+            }, [
+              { label: 'Close' },
+            ]);
+          })
+          .catch(err => {
+            log('error', 'failed to open', err);
+          }));
   }
 
   private revert = () => {
