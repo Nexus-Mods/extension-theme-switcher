@@ -6,7 +6,7 @@
   "scripts": {
     "tsc": "tsc -p .",
     "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --display-error-details --progress --profile --color",
-    "copy_lib": "copyfiles -u 4 node_modules/font-manager/build/Release/fontmanager.node dist",
+    "copy_lib": "copyfiles -u 4 node_modules/font-scanner/build/Release/fontmanager.node dist",
     "copy_themes": "copyfiles themes/**/* dist",
     "build": "npm run tsc && npm run webpack && npm run copy_lib && npm run copy_themes && extractInfo"
   },
@@ -23,7 +23,7 @@
     "webpack": "^1.13.2"
   },
   "dependencies": {
-    "font-manager": "TanninOne/font-manager",
+    "font-scanner": "^0.1.1",
     "react-bootstrap": "^0.31.0",
     "react-color": "^2.12.1",
     "redux": "^3.6.0",

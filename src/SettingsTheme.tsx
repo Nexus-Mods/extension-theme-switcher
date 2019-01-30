@@ -61,20 +61,19 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       })
       .then(() => {
         this.updateVariables(this.props.currentTheme);
-
-        return new Promise<string[]>((resolve, reject) => {
-          fontManager.getAvailableFonts((fonts) => {
-            resolve(Array.from(new Set<string>(
+        return getAvailableFontsAsync();
+      })
+      .catch(err => {
+        log('error', 'failed to request list of fonts', err.message);
+        return [];
+      })
+      .then((fonts: any[]) => {
+        this.nextState.availableFonts = Array.from(new Set<string>(
               [
                 'Roboto',
                 'BebasNeue',
                 ...fonts.map(font => font.family).sort(),
-              ])));
-          });
-        });
-      })
-      .then(fonts => {
-        this.nextState.availableFonts = fonts;
+          ]));
       });
   }
 

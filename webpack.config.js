@@ -23,7 +23,7 @@ module.exports = {
   externals: {
     bluebird: 'bluebird',
     ffi: 'ffi',
-    'font-manager': './fontmanager',
+    'font-scanner': './fontmanager',
     fs: 'fs',
     'fs-extra-promise': 'fs-extra-promise',
     'immutability-helper': 'immutability-helper',

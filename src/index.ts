@@ -2,9 +2,8 @@ import settingsReducer from './reducers';
 import SettingsTheme from './SettingsTheme';
 import { themePath } from './util';
 
-import * as Promise from 'bluebird';
 import * as path from 'path';
-import { fs, types, util } from 'vortex-api';
+import { fs, types } from 'vortex-api';
 
 function applyTheme(api: types.IExtensionApi, theme: string) {
   if (theme === null) {

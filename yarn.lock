@@ -478,9 +478,10 @@ fill-range@^2.1.0:
     repeat-element "^1.1.2"
     repeat-string "^1.5.2"
 
-font-manager@TanninOne/font-manager:
-  version "0.3.0"
-  resolved "https://codeload.github.com/TanninOne/font-manager/tar.gz/c2762bac801f81eb3fb322893210fc2d730ae66a"
+font-scanner@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/font-scanner/-/font-scanner-0.1.1.tgz#88632ec9d5163a3fb4b963f24f1f2427b6667af8"
+  integrity sha512-vSryfXML53dHrIUT/LAxKuxit9ynrDCL4CPfgvh698cTsbGpHYmgGa7eBQTnWvNFgkDFDY1PeXtIFRpbp0ViRw==
   dependencies:
     nan ">=2.10.0"
 
@@ -1587,8 +1588,8 @@ vm-browserify@0.0.4:
     indexof "0.0.1"
 
 vortex-api@Nexus-Mods/vortex-api:
-  version "0.0.1"
-  resolved "https://codeload.github.com/Nexus-Mods/vortex-api/tar.gz/79854c777b4a556800ace9ac6d2dc74abccb81b8"
+  version "0.17.0-r6"
+  resolved "https://codeload.github.com/Nexus-Mods/vortex-api/tar.gz/30f0827fb6f99f3b5a480a29d91617f6d0f4334c"
 
 warning@^3.0.0:
   version "3.0.0"
