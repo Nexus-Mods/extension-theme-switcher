@@ -6,7 +6,7 @@ import * as Promise from 'bluebird';
 import * as fontManager from 'font-scanner';
 import * as path from 'path';
 import * as React from 'react';
-import { Button, ControlLabel, FormControl, FormGroup, InputGroup, Alert } from 'react-bootstrap';
+import { Alert, Button, ControlLabel, FormControl, FormGroup, InputGroup } from 'react-bootstrap';
 import { translate } from 'react-i18next';
 import { connect } from 'react-redux';
 import * as Redux from 'redux';
@@ -177,7 +177,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     .then(() => {
       this.context.api.events.emit('select-theme', this.props.currentTheme);
     })
-    .catch(err => this.context.api.showErrorNotification(t('Unable to save theme'), err, 
+    .catch(err => this.context.api.showErrorNotification(t('Unable to save theme'), err,
       // Theme directory should have been present at this point but was removed
       //  by an external factor. This could be due to:
       // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
@@ -248,7 +248,9 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
               this.nextState.themes.push(res.input.name);
               this.selectThemeImpl(res.input.name);
             })
-            .catch(err => this.context.api.showErrorNotification(t('Failed to read theme directory'), err, 
+            .catch(err => this.context.api.showErrorNotification(
+              t('Failed to read theme directory'),
+              err,
               // Theme directory has been removed by an external method -
               // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
               { allowReport: (err as any).code !== 'ENOENT' }));

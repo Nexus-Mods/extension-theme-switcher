@@ -9,9 +9,8 @@
     "rootDir": "./src",
     "outDir": "./out",
     "jsx": "react",
-    "sourceMap": false,
-    "skipLibCheck": true,
-    "allowJs": true
+    "sourceMap": true,
+    "skipLibCheck": true
   },
     "exclude": [
       "node_modules"

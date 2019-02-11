@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
   Grid, OverlayTrigger, Panel, Popover, Row } from 'react-bootstrap';
 import { ChromePicker } from 'react-color';
-import { ComponentEx, fs, log, More, Toggle, util, types } from 'vortex-api';
+import { ComponentEx, fs, log, More, Toggle, types, util } from 'vortex-api';
 
 interface IColor {
   r: number;
@@ -367,9 +367,9 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
           .catch((util as any).MissingInterpreter, (err) => {
             onShowDialog('error', 'No handler found', {
               text: 'You don\'t have an editor associated with scss files. '
-                  + 'You can fix this by opening the following file from your file explorer, pick your '
-                  + 'favorite text editor and when prompted, choose to always open that file type '
-                  + 'with that editor.',
+                  + 'You can fix this by opening the following file from your file explorer, '
+                  + 'pick your favorite text editor and when prompted, choose to always open '
+                  + 'that file type with that editor.',
               message: err.url,
             }, [
               { label: 'Close' },

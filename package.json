@@ -8,25 +8,28 @@
     "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --display-error-details --progress --profile --color",
     "copy_lib": "copyfiles -u 4 node_modules/font-scanner/build/Release/fontmanager.node dist",
     "copy_themes": "copyfiles themes/**/* dist",
-    "build": "npm run tsc && npm run webpack && npm run copy_lib && npm run copy_themes && extractInfo"
+    "build": "npm run webpack && npm run copy_lib && npm run copy_themes && extractInfo"
   },
   "author": "Black Tree Gaming Ltd.",
   "license": "GPL-3.0",
   "devDependencies": {
-    "@types/react": "16.0.34",
-    "@types/react-bootstrap": "^0.0.50",
-    "@types/react-color": "2.11.2",
-    "@types/react-redux": "4.4.35",
+    "@types/react": "^16.4.11",
+    "@types/react-dom": "^16.8.0",
+    "@types/react-bootstrap": "^0.32.16",
+    "@types/react-color": "^2.14.0",
+    "@types/react-redux": "^6.0.6",
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
     "copyfiles": "^1.2.0",
-    "webpack": "^1.13.2"
+    "prop-types": "^15.6.1",
+    "ts-loader": "4.4.2",
+    "webpack": "^4.29.3"
   },
   "dependencies": {
     "font-scanner": "^0.1.1",
     "react-bootstrap": "^0.31.0",
-    "react-color": "^2.12.1",
-    "redux": "^3.6.0",
+    "react-color": "^2.17.0",
+    "redux": "^3.7.2",
     "vortex-api": "Nexus-Mods/vortex-api"
   }
 }
