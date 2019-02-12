@@ -74,7 +74,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           [
             'Roboto',
             'BebasNeue',
-            ...fonts.map(font => font.family).sort(),
+            ...(fonts || []).map(font => font.family).sort(),
           ]));
       });
   }
