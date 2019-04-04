@@ -13,6 +13,7 @@
   "author": "Black Tree Gaming Ltd.",
   "license": "GPL-3.0",
   "devDependencies": {
+    "@types/i18next": "^12.1.0",
     "@types/react": "^16.4.11",
     "@types/react-dom": "^16.8.0",
     "@types/react-bootstrap": "^0.32.16",
