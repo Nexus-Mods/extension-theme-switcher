@@ -11,6 +11,7 @@ import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import * as Redux from 'redux';
 import { actions, ComponentEx, fs, log, tooltip, types } from 'vortex-api';
+import { ThunkDispatch } from 'redux-thunk';
 
 const getAvailableFontsAsync = Promise.promisify(fontManager.getAvailableFonts);
 
@@ -306,7 +307,7 @@ function mapStateToProps(state: any): IConnectedProps {
   };
 }
 
-function mapDispatchToProps(dispatch: Redux.Dispatch<any>): IActionProps {
+function mapDispatchToProps(dispatch: ThunkDispatch<types.IState, null, Redux.Action>): IActionProps {
   return {
     onSelectTheme: (theme: string) => dispatch(selectTheme(theme)),
     onShowDialog: (type, title, content, dialogActions) =>
