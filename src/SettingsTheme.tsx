@@ -87,7 +87,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   public render(): JSX.Element {
     const { t, currentTheme, onShowDialog } = this.props;
-    const { availableFonts, editable, variables } = this.state;
+    const { availableFonts, editable, themes, variables } = this.state;
     return (
       <div style={{ position: 'relative' }}>
         <form>
@@ -99,7 +99,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
                 onChange={this.selectTheme}
                 value={currentTheme}
               >
-                {this.state.themes.map(theme => this.renderTheme(theme, theme))}
+                {themes.map(theme => this.renderTheme(theme, theme))}
               </FormControl>
               <InputGroup.Button>
                 <Button bsStyle='primary' onClick={this.onClone} >{t('Clone')}</Button>
