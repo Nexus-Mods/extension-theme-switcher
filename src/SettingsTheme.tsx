@@ -13,8 +13,6 @@ import * as Redux from 'redux';
 import { actions, ComponentEx, fs, log, tooltip, types } from 'vortex-api';
 import { ThunkDispatch } from 'redux-thunk';
 
-const getAvailableFontsAsync = Promise.promisify(fontManager.getAvailableFonts);
-
 interface IConnectedProps {
   currentTheme: string;
 }
@@ -64,7 +62,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       })
       .then(() => {
         this.updateVariables(this.props.currentTheme);
-        return getAvailableFontsAsync();
+        return fontManager.getAvailableFonts();
       })
       .catch(err => {
         log('error', 'failed to request list of fonts', err.message);
