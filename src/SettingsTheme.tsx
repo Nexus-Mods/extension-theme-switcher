@@ -10,8 +10,8 @@ import { Alert, Button, ControlLabel, FormControl, FormGroup, InputGroup } from 
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import * as Redux from 'redux';
-import { actions, ComponentEx, fs, log, tooltip, types } from 'vortex-api';
 import { ThunkDispatch } from 'redux-thunk';
+import { actions, ComponentEx, fs, log, tooltip, types } from 'vortex-api';
 
 interface IConnectedProps {
   currentTheme: string;
@@ -187,7 +187,9 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     const baseDir = themePath();
     const theme = Object.keys(variables)
       .map(name => `\$${name}: ${variables[name]};`);
-    return fs.writeFileAsync(path.join(baseDir, themeName, 'variables.scss'), theme.join('\r\n'));
+    return fs.writeFileAsync(path.join(baseDir, themeName, 'variables.scss'),
+      '// Automatically generated. Changes to this file will be overwritten.\r\n'
+      + theme.join('\r\n'));
   }
 
   private updateVariables(currentTheme: string) {
@@ -305,7 +307,9 @@ function mapStateToProps(state: any): IConnectedProps {
   };
 }
 
-function mapDispatchToProps(dispatch: ThunkDispatch<types.IState, null, Redux.Action>): IActionProps {
+type Dispatch = ThunkDispatch<types.IState, null, Redux.Action>;
+
+function mapDispatchToProps(dispatch: Dispatch): IActionProps {
   return {
     onSelectTheme: (theme: string) => dispatch(selectTheme(theme)),
     onShowDialog: (type, title, content, dialogActions) =>
