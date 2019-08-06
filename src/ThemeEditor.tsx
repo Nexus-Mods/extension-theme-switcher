@@ -213,22 +213,6 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
               />
             </Col>
           </FormGroup>
-          {/*
-          <FormGroup>
-            <Col sm={4}>
-              <ControlLabel>{t('HiDPI Scale:')} {hidpiScale}%</ControlLabel>
-            </Col>
-            <Col sm={8}>
-              <FormControl
-                type='range'
-                value={hidpiScale}
-                min={50}
-                max={300}
-                onChange={this.onChangeHiDPIScale}
-              />
-            </Col>
-          </FormGroup>
-          */}
           <FormGroup>
             <Col sm={4}>
               <ControlLabel>{t('Margins:')}</ControlLabel>
@@ -285,7 +269,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
             <Col smOffset={4} sm={8}>
               <FormControl.Static
                 style={{
-                  fontFamilyHeadings,
+                  fontFamily: fontFamilyHeadings,
                   fontSize: fontSize.toString() + 'px',
                   textTransform: 'uppercase',
                 }}
@@ -363,8 +347,8 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     const stylePath = path.join(themePath, 'style.scss');
     fs.ensureFileAsync(stylePath)
       .then(() =>
-        (util as any).opn(stylePath)
-          .catch((util as any).MissingInterpreter, (err) => {
+        util.opn(stylePath)
+          .catch(util.MissingInterpreter, (err) => {
             onShowDialog('error', 'No handler found', {
               text: 'You don\'t have an editor associated with scss files. '
                   + 'You can fix this by opening the following file from your file explorer, '
