@@ -106,7 +106,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
             </InputGroup>
             {editable ? null : (
               <Alert bsStyle='info'>
-                {t('Bundled themes can\'t be modified directly, please clone one to edit.')}
+                {t('Please clone this theme to modify it.')}
               </Alert>
             )}
           </FormGroup>
