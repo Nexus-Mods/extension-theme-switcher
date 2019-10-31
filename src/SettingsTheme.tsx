@@ -49,7 +49,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   public componentWillMount() {
-    (util as any).readExtensibleDir('theme', this.bundledPath, themePath())
+    util.readExtensibleDir('theme', this.bundledPath, themePath())
       .then(themePaths => {
         this.nextState.themes = themePaths;
       })
@@ -270,10 +270,8 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   private selectThemeImpl(theme: string) {
-    const { themes } = this.state;
-    const selectedPath = themes.find(iter => path.basename(iter) === theme);
-    this.props.onSelectTheme(selectedPath);
-    this.context.api.events.emit('select-theme', selectedPath);
+    this.props.onSelectTheme(theme);
+    this.context.api.events.emit('select-theme', theme);
   }
 
   private isCustom(theme: string): boolean {

@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { TranslationFunction } from 'i18next';
+import i18next from 'i18next';
 import * as path from 'path';
 import * as React from 'react';
 import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
@@ -101,7 +101,7 @@ interface IColorEntry {
 }
 
 export interface IBaseProps {
-  t: TranslationFunction;
+  t: i18next.TFunction;
   availableFonts: string[];
   themePath: string;
   theme: { [name: string]: string };
