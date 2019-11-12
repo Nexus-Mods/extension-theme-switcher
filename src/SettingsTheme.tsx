@@ -44,7 +44,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       themes: [],
       availableFonts: [],
       variables: {},
-      editable: this.isCustom(props.currentTheme),
+      editable: false,
     });
   }
 
@@ -55,6 +55,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       })
       .then(() => {
         this.updateVariables(this.props.currentTheme);
+        this.nextState.editable = this.isCustom(this.props.currentTheme);
         return fontManager.getAvailableFonts();
       })
       .catch(err => {
@@ -90,7 +91,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
               <FormControl
                 componentClass='select'
                 onChange={this.selectTheme}
-                value={path.basename(currentTheme)}
+                value={currentTheme}
               >
                 {themes.map(iter => {
                   const theme = path.basename(iter);
@@ -113,7 +114,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
         </form>
         <ThemeEditor
           t={t}
-          themePath={currentTheme}
+          themePath={this.themePath(currentTheme)}
           theme={variables}
           onApply={this.saveTheme}
           availableFonts={availableFonts}
@@ -161,18 +162,16 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       { allowReport: (err as any).code !== 'ENOENT' }));
   }
 
-  private saveThemeInternal(themeName: string, variables: { [name: string]: string }) {
+  private saveThemeInternal(outputPath: string, variables: { [name: string]: string }) {
     const theme = Object.keys(variables)
       .map(name => `\$${name}: ${variables[name]};`);
-    return fs.writeFileAsync(path.join(themeName, 'variables.scss'),
+    return fs.writeFileAsync(path.join(outputPath, 'variables.scss'),
       '// Automatically generated. Changes to this file will be overwritten.\r\n'
       + theme.join('\r\n'));
   }
 
-  private updateVariables(currentTheme: string) {
-    const currentThemePath = currentTheme.startsWith('__')
-      ? path.join(__dirname, 'themes', currentTheme.slice(2))
-      : path.join(themePath(), currentTheme);
+  private updateVariables(themeName: string) {
+    const currentThemePath = this.themePath(themeName);
 
     fs.readFileAsync(path.join(currentThemePath, 'variables.scss'))
     .then(data => {
@@ -199,20 +198,36 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     const { t, currentTheme, onShowDialog } = this.props;
     const { themes } = this.state;
 
-    onShowDialog('question', 'Enter a name', {
-      bbcode: error !== undefined ? `[color=red]${error}[/color]` : undefined,
-      input: [ {
-          id: 'name',
-          placeholder: 'Theme Name',
-          value: path.basename(currentTheme),
-        } ],
-    }, [ { label: 'Cancel' }, { label: 'Clone' } ])
+    util.getNormalizeFunc(themePath())
+      .then(normalize => {
+        const existing = new Set(themes.map(theme => normalize(path.basename(theme))));
+        return onShowDialog('question', 'Enter a name', {
+          bbcode: error !== undefined ? `[color=red]${error}[/color]` : undefined,
+          input: [{
+            id: 'name',
+            placeholder: 'Theme Name',
+            value: currentTheme,
+          }],
+          condition: (content: types.IDialogContent) => {
+            const res: types.IConditionResult[] = [];
+            const { value } = content.input[0];
+            if ((value !== undefined) && (existing.has(normalize(value)))) {
+              res.push({
+                id: 'name',
+                errorText: 'Name already used',
+                actions: ['Clone'],
+              });
+            }
+            return res;
+          },
+        }, [{ label: 'Cancel' }, { label: 'Clone' }]);
+    })
     .then(res => {
       if (res.action === 'Clone') {
         if (res.input.name &&
             (themes.findIndex(iter => path.basename(iter) === res.input.name) === -1)) {
           const targetPath = path.join(themePath(), res.input.name);
-          const sourcePath = currentTheme;
+          const sourcePath = this.themePath(currentTheme);
           return fs.ensureDirAsync(targetPath)
             .then(() =>
               this.saveThemeInternal(path.join(themePath(), res.input.name), this.state.variables))
@@ -233,6 +248,9 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
         }
       }
       return Promise.resolve();
+    })
+    .catch(err => {
+      this.context.api.showErrorNotification('Failed to clone theme', err);
     });
   }
 
@@ -251,9 +269,10 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           label: 'Confirm',
           action: () => {
             this.selectThemeImpl('default');
+            const currentThemePath = this.themePath(currentTheme);
             this.nextState.themes = this.state.themes
-              .filter(iter => iter !== currentTheme);
-            fs.removeAsync(currentTheme)
+              .filter(iter => iter !== currentThemePath);
+            fs.removeAsync(currentThemePath)
               .then(() => {
                 log('info', 'removed theme', currentTheme);
               })
@@ -274,8 +293,13 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     this.context.api.events.emit('select-theme', theme);
   }
 
-  private isCustom(theme: string): boolean {
-    return !path.relative(themePath(), theme).startsWith('..');
+  private themePath = (themeName: string): string => {
+    const { themes } = this.state;
+    return themes.find(theme => path.basename(theme) === themeName);
+  }
+
+  private isCustom = (themeName: string): boolean => {
+    return !path.relative(themePath(), this.themePath(themeName)).startsWith('..');
   }
 }
 
