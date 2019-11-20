@@ -2,7 +2,7 @@ import { selectTheme } from './actions';
 import ThemeEditor from './ThemeEditor';
 import { themePath } from './util';
 
-import * as Promise from 'bluebird';
+import Promise from 'bluebird';
 import * as fontManager from 'font-scanner';
 import * as path from 'path';
 import * as React from 'react';
@@ -155,6 +155,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   private readThemes(basePath: string): Promise<string[]> {
     const { t } = this.props;
+
     // consider all directories in the theme directory as themes
     return fs.readdirAsync(basePath)
       .filter(fileName =>

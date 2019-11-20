@@ -13,6 +13,7 @@
   "author": "Black Tree Gaming Ltd.",
   "license": "GPL-3.0",
   "devDependencies": {
+    "@types/bluebird": "^3.5.29",
     "@types/i18next": "^12.1.0",
     "@types/react": "^16.4.11",
     "@types/react-dom": "^16.8.0",
@@ -27,10 +28,11 @@
     "webpack": "^4.29.3"
   },
   "dependencies": {
+    "bluebird": "3.7.1",
     "font-scanner": "^0.1.1",
     "react-bootstrap": "^0.31.0",
     "react-color": "^2.17.0",
     "redux": "^3.7.2",
-    "vortex-api": "Nexus-Mods/vortex-api"
+    "vortex-api": "Nexus-Mods/vortex-api#electron7"
   }
 }

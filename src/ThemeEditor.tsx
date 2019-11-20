@@ -1,4 +1,4 @@
-import * as Promise from 'bluebird';
+import Promise from 'bluebird';
 import { TranslationFunction } from 'i18next';
 import * as path from 'path';
 import * as React from 'react';
@@ -288,7 +288,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
                   fontFamilyHeadings,
                   fontSize: fontSize.toString() + 'px',
                   textTransform: 'uppercase',
-                }}
+                } as any}
               >
                 The quick brown fox jumps over the lazy dog
               </FormControl.Static>
