@@ -143,21 +143,23 @@ interface IComponentState {
   dark: boolean;
 }
 
+const defaultTheme = {
+  colors: {},
+  fontSize: 12,
+  fontFamily: 'Roboto',
+  fontFamilyHeadings: 'BebasNeue',
+  hidpiScale: 100,
+  margin: 30,
+  dark: false,
+};
+
 class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   private static BUCKETS = 3;
 
   constructor(props: IProps) {
     super(props);
 
-    this.initState({
-      colors: {},
-      fontSize: 12,
-      fontFamily: 'Roboto',
-      fontFamilyHeadings: 'BebasNeue',
-      hidpiScale: 100,
-      margin: 30,
-      dark: false,
-    });
+    this.initState({ ...defaultTheme });
 
   }
 
@@ -382,6 +384,12 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
 
   private revert = () => {
     this.setColors(this.props.theme);
+    this.setFontSize(this.props.theme);
+    this.setHiDPIScale(this.props.theme);
+    this.setFontFamily(this.props.theme);
+    this.setFontFamilyHeadings(this.props.theme);
+    this.setMargin(this.props.theme);
+    this.setDark(this.props.theme);
   }
 
   private apply = () => {
@@ -427,41 +435,38 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private setFontSize(theme: { [name: string]: string }) {
-    if (theme['font-size-base'] !== undefined) {
-      this.nextState.fontSize = parseInt(theme['font-size-base'], 10);
-    }
+    this.nextState.fontSize = (theme['font-size-base'] !== undefined)
+      ? parseInt(theme['font-size-base'], 10)
+      : defaultTheme.fontSize;
   }
 
   private setHiDPIScale(theme: { [name: string]: string }) {
-    if (theme['hidpi-scale-factor'] !== undefined) {
-      this.nextState.hidpiScale = parseInt(theme['hidpi-scale-factor'], 10);
-    }
+    this.nextState.hidpiScale = (theme['hidpi-scale-factor'] !== undefined)
+      ? parseInt(theme['hidpi-scale-factor'], 10)
+      : defaultTheme.hidpiScale;
   }
 
   private setFontFamily(theme: { [name: string]: string }) {
-    if (theme['font-family-base'] !== undefined) {
-      const fontFamily = theme['font-family-base'] || '';
-      this.nextState.fontFamily = fontFamily.replace(/^"|"$/g, '');
-    }
+    const fontFamily = theme['font-family-base'] || defaultTheme.fontFamily;
+    this.nextState.fontFamily = fontFamily.replace(/^"|"$/g, '');
   }
 
   private setFontFamilyHeadings(theme: { [name: string]: string }) {
-    if (theme['font-family-headings'] !== undefined) {
-      const fontFamily = theme['font-family-headings'] || '';
-      this.nextState.fontFamilyHeadings = fontFamily.replace(/^"|"$/g, '');
-    }
+    const fontFamily = theme['font-family-headings'] || defaultTheme.fontFamilyHeadings;
+    this.nextState.fontFamilyHeadings = fontFamily.replace(/^"|"$/g, '');
   }
 
   private setMargin(theme: { [name: string]: string }) {
-    if (theme['gutter-width'] !== undefined) {
-      this.nextState.margin = parseInt(theme['gutter-width'], 10);
-    }
+    this.nextState.margin = theme['gutter-width'] !== undefined
+      ? parseInt(theme['gutter-width'], 10)
+      : defaultTheme.margin;
   }
 
   private setDark(theme: { [name: string]: string }) {
-    if (theme['dark-theme'] !== undefined) {
-      this.nextState.dark = theme['dark-theme'] === 'true';
-    }
+    const dark = theme['dark-heme'] !== undefined
+      ? theme['dark-theme'] === 'true'
+      : defaultTheme.dark;
+    this.nextState.dark = dark;
   }
 
   private setColors(theme: { [name: string]: string }) {
