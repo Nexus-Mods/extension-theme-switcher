@@ -269,7 +269,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       throw new Error('invalid theme');
     }
     onShowDialog('question', t('Confirm removal'), {
-      text: t('Are you sure you want to remove the theme {{theme}}', {
+      text: t('Are you sure you want to remove the theme "{{theme}}"', {
         replace: { theme: currentTheme },
       }),
     }, [
