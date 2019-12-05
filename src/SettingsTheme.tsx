@@ -172,7 +172,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   private saveTheme = (variables: { [name: string]: string }) => {
     const { t } = this.props;
-    this.saveThemeInternal(path.join(themePath(), this.props.currentTheme), variables)
+    this.saveThemeInternal(this.props.currentTheme, variables)
     .then(() => {
       this.context.api.events.emit('select-theme', this.props.currentTheme);
     })
