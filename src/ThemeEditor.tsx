@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import { TranslationFunction } from 'i18next';
+import i18next from 'i18next';
 import * as path from 'path';
 import * as React from 'react';
 import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
@@ -101,7 +101,7 @@ interface IColorEntry {
 }
 
 export interface IBaseProps {
-  t: TranslationFunction;
+  t: i18next.TFunction;
   availableFonts: string[];
   themePath: string;
   theme: { [name: string]: string };
@@ -215,22 +215,6 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
               />
             </Col>
           </FormGroup>
-          {/*
-          <FormGroup>
-            <Col sm={4}>
-              <ControlLabel>{t('HiDPI Scale:')} {hidpiScale}%</ControlLabel>
-            </Col>
-            <Col sm={8}>
-              <FormControl
-                type='range'
-                value={hidpiScale}
-                min={50}
-                max={300}
-                onChange={this.onChangeHiDPIScale}
-              />
-            </Col>
-          </FormGroup>
-          */}
           <FormGroup>
             <Col sm={4}>
               <ControlLabel>{t('Margins:')}</ControlLabel>
@@ -287,7 +271,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
             <Col smOffset={4} sm={8}>
               <FormControl.Static
                 style={{
-                  fontFamilyHeadings,
+                  fontFamily: fontFamilyHeadings,
                   fontSize: fontSize.toString() + 'px',
                   textTransform: 'uppercase',
                 }}
@@ -365,8 +349,8 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     const stylePath = path.join(themePath, 'style.scss');
     fs.ensureFileAsync(stylePath)
       .then(() =>
-        (util as any).opn(stylePath)
-          .catch((util as any).MissingInterpreter, (err) => {
+        util.opn(stylePath)
+          .catch(util.MissingInterpreter, (err) => {
             onShowDialog('error', 'No handler found', {
               text: 'You don\'t have an editor associated with scss files. '
                   + 'You can fix this by opening the following file from your file explorer, '

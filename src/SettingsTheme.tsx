@@ -11,7 +11,7 @@ import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import * as Redux from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { actions, ComponentEx, fs, log, tooltip, types } from 'vortex-api';
+import { actions, ComponentEx, fs, log, tooltip, types, util } from 'vortex-api';
 
 interface IConnectedProps {
   currentTheme: string;
@@ -44,24 +44,18 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       themes: [],
       availableFonts: [],
       variables: {},
-      editable: !props.currentTheme.startsWith('__'),
+      editable: false,
     });
   }
 
   public componentWillMount() {
-    let bundled: string[];
-    this.readThemes(this.bundledPath)
-      .then(bundledThemes => {
-        bundled = bundledThemes
-          .map(name => '__' + name);
-        return this.readThemes(themePath());
-      })
-      .then(customThemes => {
-        this.nextState.themes = [].concat(customThemes, bundled)
-          .map(name => path.basename(name));
+    util.readExtensibleDir('theme', this.bundledPath, themePath())
+      .then(themePaths => {
+        this.nextState.themes = themePaths;
       })
       .then(() => {
         this.updateVariables(this.props.currentTheme);
+        this.nextState.editable = this.isCustom(this.props.currentTheme);
         return fontManager.getAvailableFonts();
       })
       .catch(err => {
@@ -81,7 +75,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   public componentWillReceiveProps(newProps: IProps) {
     if (this.props.currentTheme !== newProps.currentTheme) {
       this.updateVariables(newProps.currentTheme);
-      this.nextState.editable = !newProps.currentTheme.startsWith('__');
+      this.nextState.editable = this.isCustom(newProps.currentTheme);
     }
   }
 
@@ -99,7 +93,10 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
                 onChange={this.selectTheme}
                 value={currentTheme}
               >
-                {themes.map(theme => this.renderTheme(theme, theme))}
+                {themes.map(iter => {
+                  const theme = path.basename(iter);
+                  return this.renderTheme(theme, theme);
+                })}
               </FormControl>
               <InputGroup.Button>
                 <Button bsStyle='primary' onClick={this.onClone} >{t('Clone')}</Button>
@@ -110,14 +107,14 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
             </InputGroup>
             {editable ? null : (
               <Alert bsStyle='info'>
-                {t('Bundled themes can\'t be modified directly, please clone one to edit.')}
+                {t('Please clone this theme to modify it.')}
               </Alert>
             )}
           </FormGroup>
         </form>
         <ThemeEditor
           t={t}
-          themePath={path.join(themePath(), this.props.currentTheme)}
+          themePath={this.themePath(currentTheme)}
           theme={variables}
           onApply={this.saveTheme}
           availableFonts={availableFonts}
@@ -139,10 +136,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   public renderTheme(key: string, name: string) {
-    const renderName = name.startsWith('__')
-      ? name.substr(2)
-      : name;
-    return <option key={key} value={key}>{renderName}</option>;
+    return <option key={key} value={key}>{name}</option>;
   }
 
   private get bundledPath(): string {
@@ -150,31 +144,16 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   private refresh = () => {
-    this.context.api.events.emit('select-theme', this.props.currentTheme);
-  }
-
-  private readThemes(basePath: string): Promise<string[]> {
-    const { t } = this.props;
-    // consider all directories in the theme directory as themes
-    return fs.readdirAsync(basePath)
-      .filter(fileName =>
-        fs.statAsync(path.join(basePath, fileName))
-          .then(stat => stat.isDirectory()))
-      .catch(err => {
-        if (err.code === 'ENOENT') {
-          log('info', 'Failed to read theme dir', { path: basePath, err: err.message });
-        } else {
-          this.context.api.showErrorNotification(t('Failed to read theme directory'), err);
-        }
-        return [];
-      });
+    const { currentTheme } = this.props;
+    this.context.api.events.emit('select-theme', currentTheme);
   }
 
   private saveTheme = (variables: { [name: string]: string }) => {
     const { t } = this.props;
     this.saveThemeInternal(this.props.currentTheme, variables)
     .then(() => {
-      this.context.api.events.emit('select-theme', this.props.currentTheme);
+      const { currentTheme } = this.props;
+      this.context.api.events.emit('select-theme', currentTheme);
     })
     .catch(err => this.context.api.showErrorNotification(t('Unable to save theme'), err,
       // Theme directory should have been present at this point but was removed
@@ -183,19 +162,16 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       { allowReport: (err as any).code !== 'ENOENT' }));
   }
 
-  private saveThemeInternal(themeName: string, variables: { [name: string]: string }) {
-    const baseDir = themePath();
+  private saveThemeInternal(outputPath: string, variables: { [name: string]: string }) {
     const theme = Object.keys(variables)
       .map(name => `\$${name}: ${variables[name]};`);
-    return fs.writeFileAsync(path.join(baseDir, themeName, 'variables.scss'),
+    return fs.writeFileAsync(path.join(outputPath, 'variables.scss'),
       '// Automatically generated. Changes to this file will be overwritten.\r\n'
       + theme.join('\r\n'));
   }
 
-  private updateVariables(currentTheme: string) {
-    const currentThemePath = currentTheme.startsWith('__')
-      ? path.join(__dirname, 'themes', currentTheme.slice(2))
-      : path.join(themePath(), currentTheme);
+  private updateVariables(themeName: string) {
+    const currentThemePath = this.themePath(themeName);
 
     fs.readFileAsync(path.join(currentThemePath, 'variables.scss'))
     .then(data => {
@@ -222,31 +198,43 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     const { t, currentTheme, onShowDialog } = this.props;
     const { themes } = this.state;
 
-    const isBundled: boolean = currentTheme.startsWith('__');
-
-    const theme = isBundled
-      ? currentTheme.slice(2)
-      : currentTheme;
-
-    onShowDialog('question', 'Enter a name', {
-      bbcode: error !== undefined ? `[color=red]${error}[/color]` : undefined,
-      input: [ {
-          id: 'name',
-          placeholder: 'Theme Name',
-          value: theme,
-        } ],
-    }, [ { label: 'Cancel' }, { label: 'Clone' } ])
+    util.getNormalizeFunc(themePath())
+      .then(normalize => {
+        const existing = new Set(themes.map(theme => normalize(path.basename(theme))));
+        return onShowDialog('question', 'Enter a name', {
+          bbcode: error !== undefined ? `[color=red]${error}[/color]` : undefined,
+          input: [{
+            id: 'name',
+            placeholder: 'Theme Name',
+            value: currentTheme,
+          }],
+          condition: (content: types.IDialogContent) => {
+            const res: types.IConditionResult[] = [];
+            const { value } = content.input[0];
+            if ((value !== undefined) && (existing.has(normalize(value)))) {
+              res.push({
+                id: 'name',
+                errorText: 'Name already used',
+                actions: ['Clone'],
+              });
+            }
+            return res;
+          },
+        }, [{ label: 'Cancel' }, { label: 'Clone' }]);
+    })
     .then(res => {
       if (res.action === 'Clone') {
-        if (res.input.name && (themes.indexOf(res.input.name) === -1)) {
+        if (res.input.name &&
+            (themes.findIndex(iter => path.basename(iter) === res.input.name) === -1)) {
           const targetPath = path.join(themePath(), res.input.name);
-          const sourcePath = path.join(isBundled ? this.bundledPath : themePath(), theme);
+          const sourcePath = this.themePath(currentTheme);
           return fs.ensureDirAsync(targetPath)
-            .then(() => this.saveThemeInternal(res.input.name, this.state.variables))
+            .then(() =>
+              this.saveThemeInternal(path.join(themePath(), res.input.name), this.state.variables))
             .then(() => fs.readdirAsync(sourcePath))
             .map(files => fs.copyAsync(path.join(sourcePath, files), path.join(targetPath, files)))
             .then(() => {
-              this.nextState.themes.push(res.input.name);
+              this.nextState.themes.push(targetPath);
               this.selectThemeImpl(res.input.name);
             })
             .catch(err => this.context.api.showErrorNotification(
@@ -260,12 +248,15 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
         }
       }
       return Promise.resolve();
+    })
+    .catch(err => {
+      this.context.api.showErrorNotification('Failed to clone theme', err);
     });
   }
 
   private remove = () => {
     const { t, currentTheme, onShowDialog } = this.props;
-    if (!currentTheme) {
+    if (!currentTheme || !this.isCustom(currentTheme)) {
       throw new Error('invalid theme');
     }
     onShowDialog('question', t('Confirm removal'), {
@@ -275,13 +266,15 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     }, [
         { label: 'Cancel' },
         {
-          label: 'Confirm', action: () => {
-            const targetDir = path.join(themePath(), currentTheme);
-            this.selectThemeImpl('__default');
-            this.nextState.themes = this.state.themes.filter(theme => theme !== currentTheme);
-            fs.removeAsync(targetDir)
+          label: 'Confirm',
+          action: () => {
+            this.selectThemeImpl('default');
+            const currentThemePath = this.themePath(currentTheme);
+            this.nextState.themes = this.state.themes
+              .filter(iter => iter !== currentThemePath);
+            fs.removeAsync(currentThemePath)
               .then(() => {
-                log('info', 'removed theme', targetDir);
+                log('info', 'removed theme', currentTheme);
               })
               .catch(err => {
                 log('error', 'failed to remove theme', { err });
@@ -298,6 +291,15 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   private selectThemeImpl(theme: string) {
     this.props.onSelectTheme(theme);
     this.context.api.events.emit('select-theme', theme);
+  }
+
+  private themePath = (themeName: string): string => {
+    const { themes } = this.state;
+    return themes.find(theme => path.basename(theme) === themeName);
+  }
+
+  private isCustom = (themeName: string): boolean => {
+    return !path.relative(themePath(), this.themePath(themeName)).startsWith('..');
   }
 }
 

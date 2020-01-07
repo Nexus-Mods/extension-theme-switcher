@@ -1,32 +1,35 @@
 import settingsReducer from './reducers';
 import SettingsTheme from './SettingsTheme';
-import { themePath } from './util';
 
 import * as path from 'path';
-import { fs, types } from 'vortex-api';
+import { fs, types, util } from 'vortex-api';
+import { themePath } from './util';
 
 function applyTheme(api: types.IExtensionApi, theme: string) {
   if (theme === null) {
     api.setStylesheet('variables', undefined);
     api.setStylesheet('fonts', undefined);
     api.setStylesheet('style', undefined);
+    return;
   }
 
-  const fullThemePath: string = theme.startsWith('__')
-    ? path.join(__dirname, 'themes', theme.slice(2))
-    : path.join(themePath(), theme);
+  return util.readExtensibleDir('theme', path.join(__dirname, 'themes'), themePath())
+    .then(themes => {
+      const selected = themes.find(iter => path.basename(iter) === theme);
+      if (selected === undefined) {
+        return Promise.resolve();
+      }
 
-  fs.statAsync(path.join(fullThemePath, 'variables.scss'))
-    .then(() => api.setStylesheet('variables', path.join(fullThemePath, 'variables')))
-    .catch(() => api.setStylesheet('variables', undefined));
-
-  fs.statAsync(path.join(fullThemePath, 'fonts.scss'))
-    .then(() => api.setStylesheet('fonts', path.join(fullThemePath, 'fonts')))
-    .catch(() => api.setStylesheet('fonts', undefined));
-
-  fs.statAsync(path.join(fullThemePath, 'style.scss'))
-    .then(() => api.setStylesheet('style', path.join(fullThemePath, 'style')))
-    .catch(() => api.setStylesheet('style', undefined));
+      return fs.statAsync(path.join(selected, 'variables.scss'))
+        .then(() => api.setStylesheet('variables', path.join(selected, 'variables')))
+        .catch(() => api.setStylesheet('variables', undefined))
+        .then(() => fs.statAsync(path.join(selected, 'fonts.scss')))
+        .then(() => api.setStylesheet('fonts', path.join(selected, 'fonts')))
+        .catch(() => api.setStylesheet('fonts', undefined))
+        .then(() => fs.statAsync(path.join(selected, 'style.scss')))
+        .then(() => api.setStylesheet('style', path.join(selected, 'style')))
+        .catch(() => api.setStylesheet('style', undefined));
+    });
 }
 
 function init(context: types.IExtensionContext) {
@@ -36,11 +39,11 @@ function init(context: types.IExtensionContext) {
   context.once(() => {
     const store = context.api.store;
 
-    context.api.events.on('select-theme', (theme: string) => {
-      applyTheme(context.api, theme);
+    context.api.events.on('select-theme', (selectedThemePath: string) => {
+      applyTheme(context.api, selectedThemePath);
     });
 
-    applyTheme(context.api, store.getState().settings.interface.currentTheme);
+    return applyTheme(context.api, store.getState().settings.interface.currentTheme);
   });
 
   return true;
