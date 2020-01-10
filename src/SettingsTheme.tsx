@@ -245,7 +245,8 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           return fs.ensureDirAsync(targetPath)
             .then(() => this.saveThemeInternal(res.input.name, this.state.variables))
             .then(() => fs.readdirAsync(sourcePath))
-            .map(files => fs.copyAsync(path.join(sourcePath, files), path.join(targetPath, files)))
+            .map((fileName: string) =>
+              fs.copyAsync(path.join(sourcePath, fileName), path.join(targetPath, fileName)))
             .then(() => {
               this.nextState.themes.push(res.input.name);
               this.selectThemeImpl(res.input.name);
@@ -310,7 +311,7 @@ function mapStateToProps(state: any): IConnectedProps {
 
 type Dispatch = ThunkDispatch<types.IState, null, Redux.Action>;
 
-function mapDispatchToProps(dispatch: Dispatch): IActionProps {
+function mapDispatchToProps(dispatch: ThunkDispatch<any, any, Redux.Action>): IActionProps {
   return {
     onSelectTheme: (theme: string) => dispatch(selectTheme(theme)),
     onShowDialog: (type, title, content, dialogActions) =>
