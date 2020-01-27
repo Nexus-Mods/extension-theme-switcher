@@ -140,6 +140,7 @@ interface IComponentState {
   hidpiScale: number;
   colors: { [key: string]: string };
   margin: number;
+  dashletHeight: number;
   dark: boolean;
 }
 
@@ -156,6 +157,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       fontFamilyHeadings: 'BebasNeue',
       hidpiScale: 100,
       margin: 30,
+      dashletHeight: 120,
       dark: false,
     });
 
@@ -168,6 +170,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     this.setFontFamily(this.props.theme);
     this.setFontFamilyHeadings(this.props.theme);
     this.setMargin(this.props.theme);
+    this.setDashletHeight(this.props.theme);
     this.setDark(this.props.theme);
   }
 
@@ -179,13 +182,14 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       this.setFontFamily(newProps.theme);
       this.setFontFamilyHeadings(newProps.theme);
       this.setMargin(newProps.theme);
+      this.setDashletHeight(newProps.theme);
       this.setDark(newProps.theme);
     }
   }
 
   public render(): JSX.Element {
     const { t, availableFonts, disabled } = this.props;
-    const { colors, dark, fontFamily, fontFamilyHeadings,
+    const { colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
             fontSize, margin } = this.state;
 
     const buckets: IColorEntry[][] = colorDefaults.reduce((prev, value, idx) => {
@@ -294,6 +298,31 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
               </FormControl.Static>
             </Col>
           </FormGroup>
+          <FormGroup>
+            <Col sm={4}>
+              <ControlLabel>
+                {t('Dashlet Height:')} {dashletHeight}px
+                <More id='more-dashlet-height' name={t('Dashlet Height')}>
+                  {t('Every dashlet (the widgets on the Dashboards) has a height that is a '
+                    + 'multiple of this value and a width of either 1/3, 2/3 or 3/3 of the '
+                    + 'window width. Here you can adjust the base height of dashlets but '
+                    + 'we can\'t promise every dashlet will look good or even be usable with '
+                    + 'non-default height.')}
+                </More>
+              </ControlLabel>
+            </Col>
+            <Col sm={8}>
+              <FormControl
+                type='range'
+                value={dashletHeight}
+                min={50}
+                max={1000}
+                step={4}
+                onChange={this.onChangeDashletHeight}
+                disabled={disabled}
+              />
+            </Col>
+          </FormGroup>
         </Form>
 
         <Panel>
@@ -392,6 +421,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       'font-family-base': '"' + this.state.fontFamily + '"',
       'font-family-headings': '"' + this.state.fontFamilyHeadings + '"',
       'gutter-width': this.state.margin.toString() + 'px',
+      'dashlet-height': `${this.state.dashletHeight}px`,
       'dark-theme': this.state.dark ? 'true' : 'false',
     };
     const grayNames = ['gray-lighter', 'gray-light', 'gray', 'gray-dark', 'gray-darker'];
@@ -429,6 +459,10 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     this.nextState.margin = evt.currentTarget.value;
   }
 
+  private onChangeDashletHeight = evt => {
+    this.nextState.dashletHeight = evt.currentTarget.value;
+  }
+
   private onChangeDark = newValue => {
     this.nextState.dark = newValue;
   }
@@ -462,6 +496,12 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   private setMargin(theme: { [name: string]: string }) {
     if (theme['gutter-width'] !== undefined) {
       this.nextState.margin = parseInt(theme['gutter-width'], 10);
+    }
+  }
+
+  private setDashletHeight(theme: { [name: string]: string }) {
+    if (theme['dashlet-height'] !== undefined) {
+      this.nextState.dashletHeight = parseInt(theme['dashlet-height'], 10);
     }
   }
 
