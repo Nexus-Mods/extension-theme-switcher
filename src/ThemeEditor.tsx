@@ -394,6 +394,13 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       'gutter-width': this.state.margin.toString() + 'px',
       'dark-theme': this.state.dark ? 'true' : 'false',
     };
+    const grayNames = ['gray-lighter', 'gray-light', 'gray', 'gray-dark', 'gray-darker'];
+    let grayColors = ['DEE2E6', 'DDDDDD', 'A9A9A9', '4C4C4C', '2A2C2B'];
+    if (this.state.dark) {
+      grayColors = grayColors.reverse();
+    }
+
+    grayNames.forEach((id: string, idx: number) => { theme[id] = '#' + grayColors[idx]; });
 
     this.props.onApply(theme);
   }
