@@ -21,17 +21,15 @@
     "@types/react-redux": "^6.0.6",
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
-    "copyfiles": "^2.1.1",
-    "prop-types": "^15.6.1",
-    "ts-loader": "4.4.2",
-    "webpack": "^4.29.3"
-  },
-  "dependencies": {
     "bluebird": "3.7.1",
+    "copyfiles": "^2.1.1",
     "font-scanner": "^0.1.2",
+    "prop-types": "^15.6.1",
     "react-bootstrap": "^0.31.0",
     "react-color": "^2.17.0",
     "redux": "^3.7.2",
-    "vortex-api": "Nexus-Mods/vortex-api#electron7"
+    "ts-loader": "4.4.2",
+    "vortex-api": "Nexus-Mods/vortex-api#electron7",
+    "webpack": "^4.29.3"
   }
 }
