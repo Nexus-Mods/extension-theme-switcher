@@ -206,7 +206,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           input: [{
             id: 'name',
             placeholder: 'Theme Name',
-            value: currentTheme,
+            value: currentTheme !== '__default' ? currentTheme : '',
           }],
           condition: (content: types.IDialogContent) => {
             const res: types.IConditionResult[] = [];
@@ -231,7 +231,9 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           return fs.ensureDirAsync(targetPath)
             .then(() =>
               this.saveThemeInternal(path.join(themePath(), res.input.name), this.state.variables))
-            .then(() => fs.readdirAsync(sourcePath))
+            .then(() => (sourcePath !== undefined)
+              ? fs.readdirAsync(sourcePath)
+              : Promise.resolve([]))
             .map(files => fs.copyAsync(path.join(sourcePath, files), path.join(targetPath, files)))
             .then(() => {
               this.nextState.themes.push(targetPath);
