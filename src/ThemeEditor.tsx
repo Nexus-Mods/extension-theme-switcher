@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import I18next from 'i18next';
+import I18next, { TFunction } from 'i18next';
 import * as path from 'path';
 import * as React from 'react';
 import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
@@ -101,7 +101,7 @@ interface IColorEntry {
 }
 
 export interface IBaseProps {
-  t: any;
+  t: TFunction;
   availableFonts: string[];
   themePath: string;
   theme: { [name: string]: string };
@@ -144,23 +144,24 @@ interface IComponentState {
   dark: boolean;
 }
 
+const defaultTheme = {
+  colors: {},
+  fontSize: 12,
+  fontFamily: 'Roboto',
+  fontFamilyHeadings: 'BebasNeue',
+  hidpiScale: 100,
+  margin: 30,
+  dashletHeight: 120,
+  dark: false,
+};
+
 class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   private static BUCKETS = 3;
 
   constructor(props: IProps) {
     super(props);
 
-    this.initState({
-      colors: {},
-      fontSize: 12,
-      fontFamily: 'Roboto',
-      fontFamilyHeadings: 'BebasNeue',
-      hidpiScale: 100,
-      margin: 30,
-      dashletHeight: 120,
-      dark: false,
-    });
-
+    this.initState({ ...defaultTheme });
   }
 
   public componentDidMount() {
@@ -217,22 +218,6 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
               />
             </Col>
           </FormGroup>
-          {/*
-          <FormGroup>
-            <Col sm={4}>
-              <ControlLabel>{t('HiDPI Scale:')} {hidpiScale}%</ControlLabel>
-            </Col>
-            <Col sm={8}>
-              <FormControl
-                type='range'
-                value={hidpiScale}
-                min={50}
-                max={300}
-                onChange={this.onChangeHiDPIScale}
-              />
-            </Col>
-          </FormGroup>
-          */}
           <FormGroup>
             <Col sm={4}>
               <ControlLabel>{t('Margins:')}</ControlLabel>
@@ -289,7 +274,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
             <Col smOffset={4} sm={8}>
               <FormControl.Static
                 style={{
-                  fontFamilyHeadings,
+                  fontFamily: fontFamilyHeadings,
                   fontSize: fontSize.toString() + 'px',
                   textTransform: 'uppercase',
                 } as any}
@@ -392,8 +377,8 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     const stylePath = path.join(themePath, 'style.scss');
     fs.ensureFileAsync(stylePath)
       .then(() =>
-        (util as any).opn(stylePath)
-          .catch((util as any).MissingInterpreter, (err) => {
+        util.opn(stylePath)
+          .catch(util.MissingInterpreter, (err) => {
             onShowDialog('error', 'No handler found', {
               text: 'You don\'t have an editor associated with scss files. '
                   + 'You can fix this by opening the following file from your file explorer, '
@@ -411,6 +396,12 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
 
   private revert = () => {
     this.setColors(this.props.theme);
+    this.setFontSize(this.props.theme);
+    this.setHiDPIScale(this.props.theme);
+    this.setFontFamily(this.props.theme);
+    this.setFontFamilyHeadings(this.props.theme);
+    this.setMargin(this.props.theme);
+    this.setDark(this.props.theme);
   }
 
   private apply = () => {
@@ -468,35 +459,31 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private setFontSize(theme: { [name: string]: string }) {
-    if (theme['font-size-base'] !== undefined) {
-      this.nextState.fontSize = parseInt(theme['font-size-base'], 10);
-    }
+    this.nextState.fontSize = (theme['font-size-base'] !== undefined)
+      ? parseInt(theme['font-size-base'], 10)
+      : defaultTheme.fontSize;
   }
 
   private setHiDPIScale(theme: { [name: string]: string }) {
-    if (theme['hidpi-scale-factor'] !== undefined) {
-      this.nextState.hidpiScale = parseInt(theme['hidpi-scale-factor'], 10);
-    }
+    this.nextState.hidpiScale = (theme['hidpi-scale-factor'] !== undefined)
+      ? parseInt(theme['hidpi-scale-factor'], 10)
+      : defaultTheme.hidpiScale;
   }
 
   private setFontFamily(theme: { [name: string]: string }) {
-    if (theme['font-family-base'] !== undefined) {
-      const fontFamily = theme['font-family-base'] || '';
-      this.nextState.fontFamily = fontFamily.replace(/^"|"$/g, '');
-    }
+    const fontFamily = theme['font-family-base'] || defaultTheme.fontFamily;
+    this.nextState.fontFamily = fontFamily.replace(/^"|"$/g, '');
   }
 
   private setFontFamilyHeadings(theme: { [name: string]: string }) {
-    if (theme['font-family-headings'] !== undefined) {
-      const fontFamily = theme['font-family-headings'] || '';
-      this.nextState.fontFamilyHeadings = fontFamily.replace(/^"|"$/g, '');
-    }
+    const fontFamily = theme['font-family-headings'] || defaultTheme.fontFamilyHeadings;
+    this.nextState.fontFamilyHeadings = fontFamily.replace(/^"|"$/g, '');
   }
 
   private setMargin(theme: { [name: string]: string }) {
-    if (theme['gutter-width'] !== undefined) {
-      this.nextState.margin = parseInt(theme['gutter-width'], 10);
-    }
+    this.nextState.margin = theme['gutter-width'] !== undefined
+      ? parseInt(theme['gutter-width'], 10)
+      : defaultTheme.margin;
   }
 
   private setDashletHeight(theme: { [name: string]: string }) {
@@ -506,9 +493,10 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private setDark(theme: { [name: string]: string }) {
-    if (theme['dark-theme'] !== undefined) {
-      this.nextState.dark = theme['dark-theme'] === 'true';
-    }
+    const dark = theme['dark-heme'] !== undefined
+      ? theme['dark-theme'] === 'true'
+      : defaultTheme.dark;
+    this.nextState.dark = dark;
   }
 
   private setColors(theme: { [name: string]: string }) {
