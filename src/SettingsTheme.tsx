@@ -48,7 +48,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     });
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     util.readExtensibleDir('theme', this.bundledPath, themePath())
       .then(themePaths => {
         this.nextState.themes = themePaths;
@@ -72,7 +72,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       });
   }
 
-  public componentWillReceiveProps(newProps: IProps) {
+  public UNSAFE_componentWillReceiveProps(newProps: IProps) {
     if (this.props.currentTheme !== newProps.currentTheme) {
       this.updateVariables(newProps.currentTheme);
       this.nextState.editable = this.isCustom(newProps.currentTheme);

@@ -175,7 +175,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     this.setDark(this.props.theme);
   }
 
-  public componentWillReceiveProps(newProps: IProps) {
+  public UNSAFE_componentWillReceiveProps(newProps: IProps) {
     if (newProps.theme !== this.props.theme) {
       this.setColors(newProps.theme);
       this.setFontSize(newProps.theme);
