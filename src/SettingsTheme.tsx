@@ -297,6 +297,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   private themePath = (themeName: string): string => {
     const { themes } = this.state;
+    themeName = themeName.replace(/^__/, '');
     return themes.find(theme => path.basename(theme) === themeName);
   }
 
