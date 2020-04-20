@@ -493,7 +493,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private setDark(theme: { [name: string]: string }) {
-    const dark = theme['dark-heme'] !== undefined
+    const dark = theme['dark-theme'] !== undefined
       ? theme['dark-theme'] === 'true'
       : defaultTheme.dark;
     this.nextState.dark = dark;
