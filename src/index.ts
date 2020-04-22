@@ -6,6 +6,8 @@ import { fs, types, util } from 'vortex-api';
 import { themePath } from './util';
 
 function applyTheme(api: types.IExtensionApi, theme: string) {
+  (api as any).clearStylesheet();
+
   if (theme === null) {
     api.setStylesheet('variables', undefined);
     api.setStylesheet('fonts', undefined);

@@ -1,5 +1,5 @@
-import * as Promise from 'bluebird';
-import i18next from 'i18next';
+import Promise from 'bluebird';
+import I18next, { TFunction } from 'i18next';
 import * as path from 'path';
 import * as React from 'react';
 import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
@@ -101,7 +101,7 @@ interface IColorEntry {
 }
 
 export interface IBaseProps {
-  t: i18next.TFunction;
+  t: TFunction;
   availableFonts: string[];
   themePath: string;
   theme: { [name: string]: string };
@@ -140,6 +140,7 @@ interface IComponentState {
   hidpiScale: number;
   colors: { [key: string]: string };
   margin: number;
+  dashletHeight: number;
   dark: boolean;
 }
 
@@ -150,6 +151,7 @@ const defaultTheme = {
   fontFamilyHeadings: 'BebasNeue',
   hidpiScale: 100,
   margin: 30,
+  dashletHeight: 120,
   dark: false,
 };
 
@@ -160,7 +162,6 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     super(props);
 
     this.initState({ ...defaultTheme });
-
   }
 
   public componentDidMount() {
@@ -170,10 +171,11 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     this.setFontFamily(this.props.theme);
     this.setFontFamilyHeadings(this.props.theme);
     this.setMargin(this.props.theme);
+    this.setDashletHeight(this.props.theme);
     this.setDark(this.props.theme);
   }
 
-  public componentWillReceiveProps(newProps: IProps) {
+  public UNSAFE_componentWillReceiveProps(newProps: IProps) {
     if (newProps.theme !== this.props.theme) {
       this.setColors(newProps.theme);
       this.setFontSize(newProps.theme);
@@ -181,13 +183,14 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       this.setFontFamily(newProps.theme);
       this.setFontFamilyHeadings(newProps.theme);
       this.setMargin(newProps.theme);
+      this.setDashletHeight(newProps.theme);
       this.setDark(newProps.theme);
     }
   }
 
   public render(): JSX.Element {
     const { t, availableFonts, disabled } = this.props;
-    const { colors, dark, fontFamily, fontFamilyHeadings,
+    const { colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
             fontSize, margin } = this.state;
 
     const buckets: IColorEntry[][] = colorDefaults.reduce((prev, value, idx) => {
@@ -274,10 +277,35 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
                   fontFamily: fontFamilyHeadings,
                   fontSize: fontSize.toString() + 'px',
                   textTransform: 'uppercase',
-                }}
+                } as any}
               >
                 The quick brown fox jumps over the lazy dog
               </FormControl.Static>
+            </Col>
+          </FormGroup>
+          <FormGroup>
+            <Col sm={4}>
+              <ControlLabel>
+                {t('Dashlet Height:')} {dashletHeight}px
+                <More id='more-dashlet-height' name={t('Dashlet Height')}>
+                  {t('Every dashlet (the widgets on the Dashboards) has a height that is a '
+                    + 'multiple of this value and a width of either 1/3, 2/3 or 3/3 of the '
+                    + 'window width. Here you can adjust the base height of dashlets but '
+                    + 'we can\'t promise every dashlet will look good or even be usable with '
+                    + 'non-default height.')}
+                </More>
+              </ControlLabel>
+            </Col>
+            <Col sm={8}>
+              <FormControl
+                type='range'
+                value={dashletHeight}
+                min={50}
+                max={1000}
+                step={4}
+                onChange={this.onChangeDashletHeight}
+                disabled={disabled}
+              />
             </Col>
           </FormGroup>
         </Form>
@@ -384,8 +412,16 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       'font-family-base': '"' + this.state.fontFamily + '"',
       'font-family-headings': '"' + this.state.fontFamilyHeadings + '"',
       'gutter-width': this.state.margin.toString() + 'px',
+      'dashlet-height': `${this.state.dashletHeight}px`,
       'dark-theme': this.state.dark ? 'true' : 'false',
     };
+    const grayNames = ['gray-lighter', 'gray-light', 'gray', 'gray-dark', 'gray-darker'];
+    let grayColors = ['DEE2E6', 'DDDDDD', 'A9A9A9', '4C4C4C', '2A2C2B'];
+    if (this.state.dark) {
+      grayColors = grayColors.reverse();
+    }
+
+    grayNames.forEach((id: string, idx: number) => { theme[id] = '#' + grayColors[idx]; });
 
     this.props.onApply(theme);
   }
@@ -412,6 +448,10 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
 
   private onChangeMargin = evt => {
     this.nextState.margin = evt.currentTarget.value;
+  }
+
+  private onChangeDashletHeight = evt => {
+    this.nextState.dashletHeight = evt.currentTarget.value;
   }
 
   private onChangeDark = newValue => {
@@ -446,8 +486,14 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       : defaultTheme.margin;
   }
 
+  private setDashletHeight(theme: { [name: string]: string }) {
+    if (theme['dashlet-height'] !== undefined) {
+      this.nextState.dashletHeight = parseInt(theme['dashlet-height'], 10);
+    }
+  }
+
   private setDark(theme: { [name: string]: string }) {
-    const dark = theme['dark-heme'] !== undefined
+    const dark = theme['dark-theme'] !== undefined
       ? theme['dark-theme'] === 'true'
       : defaultTheme.dark;
     this.nextState.dark = dark;

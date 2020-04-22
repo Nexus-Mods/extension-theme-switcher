@@ -2,7 +2,7 @@ import { selectTheme } from './actions';
 import ThemeEditor from './ThemeEditor';
 import { themePath } from './util';
 
-import * as Promise from 'bluebird';
+import Promise from 'bluebird';
 import * as fontManager from 'font-scanner';
 import * as path from 'path';
 import * as React from 'react';
@@ -48,7 +48,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     });
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     util.readExtensibleDir('theme', this.bundledPath, themePath())
       .then(themePaths => {
         this.nextState.themes = themePaths;
@@ -72,7 +72,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       });
   }
 
-  public componentWillReceiveProps(newProps: IProps) {
+  public UNSAFE_componentWillReceiveProps(newProps: IProps) {
     if (this.props.currentTheme !== newProps.currentTheme) {
       this.updateVariables(newProps.currentTheme);
       this.nextState.editable = this.isCustom(newProps.currentTheme);
@@ -297,6 +297,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   private themePath = (themeName: string): string => {
     const { themes } = this.state;
+    themeName = themeName.replace(/^__/, '');
     return themes.find(theme => path.basename(theme) === themeName);
   }
 
@@ -313,7 +314,7 @@ function mapStateToProps(state: any): IConnectedProps {
 
 type Dispatch = ThunkDispatch<types.IState, null, Redux.Action>;
 
-function mapDispatchToProps(dispatch: Dispatch): IActionProps {
+function mapDispatchToProps(dispatch: ThunkDispatch<any, any, Redux.Action>): IActionProps {
   return {
     onSelectTheme: (theme: string) => dispatch(selectTheme(theme)),
     onShowDialog: (type, title, content, dialogActions) =>
