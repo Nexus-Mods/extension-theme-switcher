@@ -5,8 +5,10 @@ import * as path from 'path';
 import { fs, types, util } from 'vortex-api';
 import { themePath } from './util';
 
-function applyTheme(api: types.IExtensionApi, theme: string) {
-  (api as any).clearStylesheet();
+function applyTheme(api: types.IExtensionApi, theme: string, initial: boolean) {
+  if (!initial) {
+    api.clearStylesheet();
+  }
 
   if (theme === null) {
     api.setStylesheet('variables', undefined);
@@ -45,10 +47,10 @@ function init(context: types.IExtensionContext) {
     const store = context.api.store;
 
     context.api.events.on('select-theme', (selectedThemePath: string) => {
-      applyTheme(context.api, selectedThemePath);
+      applyTheme(context.api, selectedThemePath, false);
     });
 
-    return applyTheme(context.api, store.getState().settings.interface.currentTheme);
+    return applyTheme(context.api, store.getState().settings.interface.currentTheme, true);
   });
 
   return true;
