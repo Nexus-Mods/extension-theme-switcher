@@ -172,6 +172,12 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   private updateVariables(themeName: string) {
     const currentThemePath = this.themePath(themeName);
+    if (currentThemePath === undefined) {
+      // likely was deleted outside Vortex
+      log('warn', 'theme not found', themeName);
+      this.nextState.variables = {};
+      return;
+    }
 
     fs.readFileAsync(path.join(currentThemePath, 'variables.scss'))
     .then(data => {
