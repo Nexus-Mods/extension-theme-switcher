@@ -308,7 +308,15 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   private isCustom = (themeName: string): boolean => {
-    return !path.relative(themePath(), this.themePath(themeName)).startsWith('..');
+    const themeFilePath = this.themePath(themeName);
+    if (!themeFilePath) {
+      // We don't have the filepath to this theme..
+      //  possibly a race condition ? if so, this should
+      //  clear up next time the state updates.
+      //  https://github.com/Nexus-Mods/Vortex/issues/7191
+      return false;
+    }
+    return !path.relative(themePath(), themeFilePath).startsWith('..');
   }
 }
 
