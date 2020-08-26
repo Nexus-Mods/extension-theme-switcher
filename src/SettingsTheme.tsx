@@ -264,6 +264,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   private remove = () => {
     const { t, currentTheme, onShowDialog } = this.props;
+    log('info', 'removing theme', currentTheme);
     if (!currentTheme || !this.isCustom(currentTheme)) {
       throw new Error('invalid theme');
     }
@@ -309,11 +310,15 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
 
   private isCustom = (themeName: string): boolean => {
     const themeFilePath = this.themePath(themeName);
-    if (!themeFilePath) {
+    if (themeFilePath === undefined) {
       // We don't have the filepath to this theme..
       //  possibly a race condition ? if so, this should
       //  clear up next time the state updates.
       //  https://github.com/Nexus-Mods/Vortex/issues/7191
+      //
+      // the above issue was in the remove callback so the likely scenario is
+      // that that event was triggered twice and on the second time it was handled
+      // the theme is already gone.
       return false;
     }
     return !path.relative(themePath(), themeFilePath).startsWith('..');
