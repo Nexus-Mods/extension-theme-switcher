@@ -224,6 +224,13 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
                 actions: ['Clone'],
               });
             }
+            if (!(util as any).isFilenameValid(value)) {
+              res.push({
+                id: 'name',
+                errorText: 'Invalid symbols in name',
+                actions: ['Clone'],
+              });
+            }
             return res;
           },
         }, [{ label: 'Cancel' }, { label: 'Clone' }]);
