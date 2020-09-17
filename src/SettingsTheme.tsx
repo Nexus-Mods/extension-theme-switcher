@@ -328,7 +328,12 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       // the theme is already gone.
       return false;
     }
-    return !path.relative(themePath(), themeFilePath).startsWith('..');
+
+    // isChildPath plays a bit fast and loose when it comes to directory normalization
+    // if we don't pass in a normalizer, but that shouldn't be a problem here, the official
+    // themes are in the application folder and the themes are in APPDATA or ProgramData so
+    // upper/lower case shouldn't be that big of a deal
+    return !util.isChildPath(themeFilePath, themePath());
   }
 }
 
