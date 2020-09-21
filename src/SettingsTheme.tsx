@@ -333,7 +333,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     // if we don't pass in a normalizer, but that shouldn't be a problem here, the official
     // themes are in the application folder and the themes are in APPDATA or ProgramData so
     // upper/lower case shouldn't be that big of a deal
-    return !util.isChildPath(themeFilePath, themePath());
+    return util.isChildPath(themeFilePath, themePath());
   }
 }
 
