@@ -251,7 +251,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
           <FormGroup>
             <Col smOffset={4} sm={8}>
               <FormControl.Static style={{ fontFamily, fontSize: fontSize.toString() + 'px' }}>
-                The quick brown fox jumps over the lazy dog
+                {t('The quick brown fox jumps over the lazy dog')}
               </FormControl.Static>
             </Col>
           </FormGroup>
@@ -279,7 +279,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
                   textTransform: 'uppercase',
                 } as any}
               >
-                The quick brown fox jumps over the lazy dog
+                {t('The quick brown fox jumps over the lazy dog')}
               </FormControl.Static>
             </Col>
           </FormGroup>
