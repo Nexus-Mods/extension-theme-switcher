@@ -152,7 +152,7 @@ const defaultTheme = {
   hidpiScale: 100,
   margin: 30,
   dashletHeight: 120,
-  dark: false,
+  dark: true,
 };
 
 class ThemeEditor extends ComponentEx<IProps, IComponentState> {
