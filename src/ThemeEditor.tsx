@@ -1,4 +1,5 @@
 import Promise from 'bluebird';
+import {} from 'font-scanner';
 import I18next, { TFunction } from 'i18next';
 import * as path from 'path';
 import * as React from 'react';
@@ -102,7 +103,6 @@ interface IColorEntry {
 
 export interface IBaseProps {
   t: TFunction;
-  availableFonts: string[];
   themePath: string;
   theme: { [name: string]: string };
   disabled: boolean;
@@ -142,6 +142,8 @@ interface IComponentState {
   margin: number;
   dashletHeight: number;
   dark: boolean;
+
+  availableFonts: string[];
 }
 
 const defaultTheme = {
@@ -155,13 +157,32 @@ const defaultTheme = {
   dark: true,
 };
 
+const standardFonts: string[] = [
+  'Roboto',
+  'BebasNeue',
+  'sans-serif',
+  'serif',
+  'Arial',
+  'Courier New',
+  'Georgia',
+  'Impact',
+  'Marlett',
+  'Monaco',
+  'Tahoma',
+  'Times New Roman',
+  'Verdana',
+];
+
 class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   private static BUCKETS = 3;
 
   constructor(props: IProps) {
     super(props);
 
-    this.initState({ ...defaultTheme });
+    this.initState({
+      ...defaultTheme,
+      availableFonts: standardFonts,
+    });
   }
 
   public componentDidMount() {
@@ -189,8 +210,8 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   public render(): JSX.Element {
-    const { t, availableFonts, disabled } = this.props;
-    const { colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
+    const { t, disabled } = this.props;
+    const { availableFonts, colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
             fontSize, margin } = this.state;
 
     const buckets: IColorEntry[][] = colorDefaults.reduce((prev, value, idx) => {
@@ -237,7 +258,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
             <Col sm={4}>
               <ControlLabel>{t('Font Family:')}</ControlLabel>
             </Col>
-            <Col sm={8}>
+            <Col sm={4}>
               <FormControl
                 componentClass='select'
                 onChange={this.onChangeFontFamily}
@@ -246,6 +267,15 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
               >
                 {availableFonts.map(this.renderFontOption)}
               </FormControl>
+            </Col>
+            <Col sm={4}>
+              <Button onClick={this.readFont}>{t('Read system fonts')}</Button>
+              <More id='more-system-fonts' name={t('System Fonts')}>
+                {t('Makes all system fonts installed on the system available in the Font dropdowns. '
+                   + 'This function seems to cause Vortex to crash for a very small number '
+                   + 'of users and we have not been able to identify what sets the '
+                   + 'affected systems apart yet.')}
+              </More>
             </Col>
           </FormGroup>
           <FormGroup>
@@ -344,6 +374,19 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
         )}
       </div>
     );
+  }
+
+  private readFont = () => {
+    const fontManager = require('font-scanner');
+    return fontManager.getAvailableFonts()
+      .then(fonts => {
+        this.nextState.availableFonts = Array.from(new Set<string>(
+          [
+            'Roboto',
+            'BebasNeue',
+            ...(fonts || []).map(font => font.family).sort(),
+          ]));
+      });
   }
 
   private renderEntry = (entry: IColorEntry, value: string) => {

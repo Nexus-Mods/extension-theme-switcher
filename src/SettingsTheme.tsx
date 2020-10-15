@@ -3,7 +3,6 @@ import ThemeEditor from './ThemeEditor';
 import { themePath } from './util';
 
 import Promise from 'bluebird';
-import * as fontManager from 'font-scanner';
 import * as path from 'path';
 import * as React from 'react';
 import { Alert, Button, ControlLabel, FormControl, FormGroup, InputGroup } from 'react-bootstrap';
@@ -56,7 +55,6 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       .then(() => {
         this.updateVariables(this.props.currentTheme);
         this.nextState.editable = this.isCustom(this.props.currentTheme);
-        return fontManager.getAvailableFonts();
       })
       .catch(err => {
         log('error', 'failed to request list of fonts', err.message);
@@ -117,7 +115,6 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           themePath={this.themePath(currentTheme)}
           theme={variables}
           onApply={this.saveTheme}
-          availableFonts={availableFonts}
           disabled={!editable}
           onShowDialog={onShowDialog}
         />
