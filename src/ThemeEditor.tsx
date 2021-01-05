@@ -448,11 +448,15 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private apply = () => {
+    let fontFamily = this.state.fontFamily;
+    if (!['serif', 'sans-serif'].includes(fontFamily)) {
+      fontFamily = `"${fontFamily}"`;
+    }
     const theme: { [key: string]: string } = {
       ...this.state.colors,
       'font-size-base': this.state.fontSize.toString() + 'px',
       'hidpi-scale-factor': this.state.hidpiScale.toString() + '%',
-      'font-family-base': '"' + this.state.fontFamily + '"',
+      'font-family-base': fontFamily,
       'font-family-headings': '"' + this.state.fontFamilyHeadings + '"',
       'gutter-width': this.state.margin.toString() + 'px',
       'dashlet-height': `${this.state.dashletHeight}px`,
