@@ -16,19 +16,25 @@
   }
 }
 
-.mainpage-header:hover {
-  height: 64px !important;
-  transition: height 250ms ease;
-}
+.mainpage-header .btn {
+  .button-text {
+    opacity: 0;
+    transition: opacity 250ms ease;
 
-.mainpage-header:hover .button-text {
-  opacity: 1;
-  transition: opacity 250ms ease 100ms;
-}
+    position: absolute;
+    top: 32px;
+    z-index: 1;
+    background-color: $brand-bg;
+    border: $border-width solid $border-color;
+    padding: 8px;
+    font-size: 1em;
+    pointer-events: none;
+  }
 
-.mainpage-header .button-text {
-  opacity: 0;
-  transition: opacity 250ms ease;
+  &:hover .button-text {
+    opacity: 1;
+    transition: opacity 250ms ease 100ms;
+  }
 }
 
 // if the sidebar is collapsed, show the tab name when hovering
