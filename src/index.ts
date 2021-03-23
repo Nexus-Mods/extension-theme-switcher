@@ -40,8 +40,8 @@ function applyTheme(api: types.IExtensionApi, theme: string, initial: boolean) {
 }
 
 function init(context: types.IExtensionContext) {
-  context.registerSettings('Theme', SettingsTheme);
   context.registerReducer(['settings', 'interface'], settingsReducer);
+  context.registerSettings('Theme', SettingsTheme);
 
   context.once(() => {
     const store = context.api.store;
