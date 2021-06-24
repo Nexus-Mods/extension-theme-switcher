@@ -150,7 +150,7 @@ const defaultTheme = {
   colors: {},
   fontSize: 12,
   fontFamily: 'Roboto',
-  fontFamilyHeadings: 'BebasNeue',
+  fontFamilyHeadings: 'Montserrat',
   hidpiScale: 100,
   margin: 30,
   dashletHeight: 120,
@@ -159,6 +159,7 @@ const defaultTheme = {
 
 const standardFonts: string[] = [
   'Roboto',
+  'Montserrat',
   'BebasNeue',
   'sans-serif',
   'serif',
@@ -383,6 +384,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
         this.nextState.availableFonts = Array.from(new Set<string>(
           [
             'Roboto',
+            'Montserrat',
             'BebasNeue',
             ...(fonts || []).map(font => font.family).sort(),
           ]));
