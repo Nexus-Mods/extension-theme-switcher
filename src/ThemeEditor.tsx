@@ -368,19 +368,15 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
         </Form>
 
         <Panel>
-          <div className='panel-body'>
-            <Grid style={{ width: '100%' }}>
-              {buckets[0].map((value, idx) => {
-                return (
-                  <Row key={idx}>
-                    {buckets.map(bucket =>
-                      bucket[idx] !== undefined
-                        ? this.renderEntry(bucket[idx], colors[bucket[idx].name])
-                        : null)}
-                  </Row>
-                );
-              })}
-            </Grid>
+          <div className='colors-grid' style={{ width: '100%' }}>
+            {buckets[0].map((value, idx) => {
+              return (
+                buckets.map(bucket =>
+                  bucket[idx] !== undefined
+                    ? this.renderEntry(bucket[idx], colors[bucket[idx].name])
+                    : null)
+              );
+            })}
           </div>
         </Panel>
         <Toggle checked={dark} onToggle={this.onChangeDark} disabled={disabled}>

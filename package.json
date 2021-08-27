@@ -6,9 +6,10 @@
   "scripts": {
     "tsc": "tsc -p .",
     "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --display-error-details --progress --profile --color",
+    "copy_scss": "copyfiles -f src/theme-switcher.scss dist",
     "copy_lib": "copyfiles -u 4 node_modules/font-scanner/build/Release/fontmanager.node dist",
     "copy_themes": "copyfiles themes/**/* dist",
-    "build": "npm run webpack && npm run copy_lib && npm run copy_themes && extractInfo"
+    "build": "npm run webpack && npm run copy_lib && npm run copy_themes && npm run copy_scss && extractInfo"
   },
   "author": "Black Tree Gaming Ltd.",
   "license": "GPL-3.0",
