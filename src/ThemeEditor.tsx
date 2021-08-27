@@ -1,10 +1,12 @@
 import Promise from 'bluebird';
-import {} from 'font-scanner';
+import { } from 'font-scanner';
 import I18next, { TFunction } from 'i18next';
 import * as path from 'path';
 import * as React from 'react';
-import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
-  Grid, OverlayTrigger, Panel, Popover, Row } from 'react-bootstrap';
+import {
+  Button, Col, ControlLabel, Form, FormControl, FormGroup,
+  Grid, OverlayTrigger, Panel, Popover, Row
+} from 'react-bootstrap';
 import { ChromePicker } from 'react-color';
 import { ComponentEx, fs, log, More, Toggle, types, util } from 'vortex-api';
 
@@ -118,19 +120,44 @@ export interface IBaseProps {
 type IProps = IBaseProps;
 
 const colorDefaults: IColorEntry[] = [
-  { name: 'brand-primary', value: '#D78F46' },
-  { name: 'brand-highlight', value: '#00C1FF' },
-  { name: 'brand-success', value: '#86B951' },
-  { name: 'brand-info', value: '#00C1FF' },
-  { name: 'brand-warning', value: '#FF7300' },
-  { name: 'brand-danger', value: '#FF1C38' },
-  { name: 'brand-bg', value: '#2A2C2B' },
-  { name: 'brand-menu', value: '#4C4C4C' },
-  { name: 'brand-secondary', value: '#D78F46' },
-  { name: 'brand-clickable', value: '#D78F46' },
-  { name: 'text-color', value: '#eeeeee' },
-  { name: 'text-color-disabled', value: '#bbbbbb' },
-  { name: 'link-color', value: '#D78F46' },
+  { name: 'primary', value: '#d98f40' },
+  { name: 'primary-darker', value: '#c87b28' },
+  { name: 'primary-lighter', value: '#e0a362' },
+  { name: 'secondary', value: '#2a2c2b' },
+  { name: 'secondary-darker', value: '#161717' },
+  { name: 'secondary-lighter', value: '#3e413f' },
+  { name: 'tertiary', value: '#dddddd' },
+  { name: 'tertiary-darker', value: '#c9c9c9' },
+  { name: 'tertiary-lighter', value: '#f1f1f1' },
+  // Backgrounds
+  { name: 'background-primary', value: '#101010' },
+  { name: 'background-secondary', value: '#181818' },
+  { name: 'background-tertiary', value: '#222222' },
+  { name: 'content-primary', value: '#1c1c1c' },
+  { name: 'content-secondary', value: '#2b2d2f' },
+  // Statuses
+  { name: 'error', value: '#cc0000' },
+  { name: 'error-darker', value: '#a30000' },
+  { name: 'error-lighter', value: '#f50000' },
+  { name: 'warning', value: '#f4b740' },
+  { name: 'warning-darker', value: '#f2a819' },
+  { name: 'warning-lighter', value: '#f6c667' },
+  { name: 'success', value: '#1c8930' },
+  { name: 'success-darker', value: '#156724' },
+  { name: 'success-lighter', value: '#23ab3c' },
+  { name: 'accent', value: '#388ffa' },
+  { name: 'accent-darker', value: '#1079f9' },
+  { name: 'accent-lighter', value: '#60a5fb' },
+  // Borders
+  { name: 'border-structural', value: '#303236' },
+  { name: 'border-container', value: '#3c3f44' },
+  // Fonts
+  { name: 'font-primary-dark', value: '#ffffff' },
+  { name: 'font-secondary-dark', value: '#aaaaaa' },
+  { name: 'font-tertiary-dark', value: '#5a5a5a' },
+  { name: 'font-primary-light', value: '#303030' },
+  { name: 'font-secondary-light', value: '#666666' },
+  { name: 'font-tertiary-light', value: '#b3b3b3' },
 ];
 
 interface IComponentState {
@@ -212,7 +239,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   public render(): JSX.Element {
     const { t, disabled } = this.props;
     const { availableFonts, colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
-            fontSize, margin } = this.state;
+      fontSize, margin } = this.state;
 
     const buckets: IColorEntry[][] = colorDefaults.reduce((prev, value, idx) => {
       if (idx < ThemeEditor.BUCKETS) {
@@ -272,9 +299,9 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
               <Button onClick={this.readFont}>{t('Read system fonts')}</Button>
               <More id='more-system-fonts' name={t('System Fonts')}>
                 {t('Makes all system fonts installed on the system available in the Font dropdowns. '
-                   + 'This function seems to cause Vortex to crash for a very small number '
-                   + 'of users and we have not been able to identify what sets the '
-                   + 'affected systems apart yet.')}
+                  + 'This function seems to cause Vortex to crash for a very small number '
+                  + 'of users and we have not been able to identify what sets the '
+                  + 'affected systems apart yet.')}
               </More>
             </Col>
           </FormGroup>
@@ -424,9 +451,9 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
           .catch(util.MissingInterpreter, (err) => {
             onShowDialog('error', 'No handler found', {
               text: 'You don\'t have an editor associated with scss files. '
-                  + 'You can fix this by opening the following file from your file explorer, '
-                  + 'pick your favorite text editor and when prompted, choose to always open '
-                  + 'that file type with that editor.',
+                + 'You can fix this by opening the following file from your file explorer, '
+                + 'pick your favorite text editor and when prompted, choose to always open '
+                + 'that file type with that editor.',
               message: err.url,
             }, [
               { label: 'Close' },
@@ -549,9 +576,9 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   private setColors(theme: { [name: string]: string }) {
     this.nextState.colors = {};
     colorDefaults.forEach(entry => {
-        if (colorDefaults.find(color => color.name === entry.name) !== undefined) {
-            this.nextState.colors[entry.name] = theme[entry.name] || entry.value;
-        }
+      if (colorDefaults.find(color => color.name === entry.name) !== undefined) {
+        this.nextState.colors[entry.name] = theme[entry.name] || entry.value;
+      }
     });
   }
 }
