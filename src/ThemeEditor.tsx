@@ -9,7 +9,7 @@ import {
 } from 'react-bootstrap';
 import { ChromePicker } from 'react-color';
 import { ComponentEx, fs, log, More, Toggle, types, util } from 'vortex-api';
-
+import { COLOR_DEFAULTS, IColorEntry } from './defaults/colors.defaults'
 interface IColor {
   r: number;
   g: number;
@@ -98,11 +98,6 @@ class ColorPreview extends React.Component<IColorProps, {}> {
   }
 }
 
-interface IColorEntry {
-  name: string;
-  value: string;
-}
-
 export interface IBaseProps {
   t: TFunction;
   themePath: string;
@@ -118,47 +113,6 @@ export interface IBaseProps {
 }
 
 type IProps = IBaseProps;
-
-const colorDefaults: IColorEntry[] = [
-  { name: 'primary', value: '#d98f40' },
-  { name: 'primary-darker', value: '#c87b28' },
-  { name: 'primary-lighter', value: '#e0a362' },
-  { name: 'secondary', value: '#2a2c2b' },
-  { name: 'secondary-darker', value: '#161717' },
-  { name: 'secondary-lighter', value: '#3e413f' },
-  { name: 'tertiary', value: '#dddddd' },
-  { name: 'tertiary-darker', value: '#c9c9c9' },
-  { name: 'tertiary-lighter', value: '#f1f1f1' },
-  // Backgrounds
-  { name: 'background-primary', value: '#101010' },
-  { name: 'background-secondary', value: '#181818' },
-  { name: 'background-tertiary', value: '#222222' },
-  { name: 'content-primary', value: '#1c1c1c' },
-  { name: 'content-secondary', value: '#2b2d2f' },
-  // Statuses
-  { name: 'error', value: '#cc0000' },
-  { name: 'error-darker', value: '#a30000' },
-  { name: 'error-lighter', value: '#f50000' },
-  { name: 'warning', value: '#f4b740' },
-  { name: 'warning-darker', value: '#f2a819' },
-  { name: 'warning-lighter', value: '#f6c667' },
-  { name: 'success', value: '#1c8930' },
-  { name: 'success-darker', value: '#156724' },
-  { name: 'success-lighter', value: '#23ab3c' },
-  { name: 'accent', value: '#388ffa' },
-  { name: 'accent-darker', value: '#1079f9' },
-  { name: 'accent-lighter', value: '#60a5fb' },
-  // Borders
-  { name: 'border-structural', value: '#303236' },
-  { name: 'border-container', value: '#3c3f44' },
-  // Fonts
-  { name: 'font-primary-dark', value: '#ffffff' },
-  { name: 'font-secondary-dark', value: '#aaaaaa' },
-  { name: 'font-tertiary-dark', value: '#5a5a5a' },
-  { name: 'font-primary-light', value: '#303030' },
-  { name: 'font-secondary-light', value: '#666666' },
-  { name: 'font-tertiary-light', value: '#b3b3b3' },
-];
 
 interface IComponentState {
   fontFamily: string;
@@ -241,13 +195,14 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     const { availableFonts, colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
       fontSize, margin } = this.state;
 
-    const buckets: IColorEntry[][] = colorDefaults.reduce((prev, value, idx) => {
+    const buckets: IColorEntry[][] = COLOR_DEFAULTS.reduce((prev, value, idx) => {
       if (idx < ThemeEditor.BUCKETS) {
         prev[idx % ThemeEditor.BUCKETS] = [];
       }
       prev[idx % ThemeEditor.BUCKETS].push(value);
       return prev;
     }, new Array(ThemeEditor.BUCKETS));
+
     return (
       <div>
         <Form disabled={disabled} horizontal>
@@ -485,13 +440,13 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       'dashlet-height': `${this.state.dashletHeight}px`,
       'dark-theme': this.state.dark ? 'true' : 'false',
     };
-    const grayNames = ['gray-lighter', 'gray-light', 'gray', 'gray-dark', 'gray-darker'];
-    let grayColors = ['DEE2E6', 'DDDDDD', 'A9A9A9', '4C4C4C', '2A2C2B'];
-    if (this.state.dark) {
-      grayColors = grayColors.reverse();
-    }
+    // const grayNames = ['gray-lighter', 'gray-light', 'gray', 'gray-dark', 'gray-darker'];
+    // let grayColors = ['DEE2E6', 'DDDDDD', 'A9A9A9', '4C4C4C', '2A2C2B'];
+    // if (this.state.dark) {
+    //   grayColors = grayColors.reverse();
+    // }
 
-    grayNames.forEach((id: string, idx: number) => { theme[id] = '#' + grayColors[idx]; });
+    // grayNames.forEach((id: string, idx: number) => { theme[id] = '#' + grayColors[idx]; });
 
     this.props.onApply(theme);
   }
@@ -571,8 +526,8 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
 
   private setColors(theme: { [name: string]: string }) {
     this.nextState.colors = {};
-    colorDefaults.forEach(entry => {
-      if (colorDefaults.find(color => color.name === entry.name) !== undefined) {
+    COLOR_DEFAULTS.forEach(entry => {
+      if (COLOR_DEFAULTS.find(color => color.name === entry.name) !== undefined) {
         this.nextState.colors[entry.name] = theme[entry.name] || entry.value;
       }
     });

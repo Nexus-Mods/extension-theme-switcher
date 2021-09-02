@@ -1,6 +1,6 @@
 import { selectTheme } from './actions';
 import ThemeEditor from './ThemeEditor';
-import { themePath } from './util';
+import { pSBC, themePath } from './util';
 
 import Promise from 'bluebird';
 import * as path from 'path';
@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import * as Redux from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { actions, ComponentEx, fs, log, tooltip, types, util } from 'vortex-api';
+import { COLOR_DEFAULTS, V1_TO_V2_MAP } from './defaults/colors.defaults';
 
 interface IConnectedProps {
   currentTheme: string;
@@ -29,6 +30,7 @@ interface IActionProps {
 type IProps = IConnectedProps & IActionProps;
 
 interface IComponentState {
+  isOldTheme: boolean;
   themes: string[];
   availableFonts: string[];
   variables: { [key: string]: string };
@@ -44,6 +46,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       availableFonts: [],
       variables: {},
       editable: false,
+      isOldTheme: false,
     });
   }
 
@@ -84,7 +87,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       <div style={{ position: 'relative' }}>
         <form>
           <FormGroup controlId='themeSelect'>
-              <ControlLabel>{t('Theme')}</ControlLabel>
+            <ControlLabel>{t('Theme')}</ControlLabel>
             <InputGroup style={{ width: 300 }}>
               <FormControl
                 componentClass='select'
@@ -108,6 +111,11 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
                 {t('Please clone this theme to modify it.')}
               </Alert>
             )}
+            {this.state.isOldTheme ? (
+              <Alert bsStyle='info'>
+                {t('This theme is no longer supported, but if you clone it and re-apply it, Vortex will try to convert it to a V2 compatible version')}
+              </Alert>
+            ) : undefined}
           </FormGroup>
         </form>
         <ThemeEditor
@@ -118,16 +126,16 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           disabled={!editable}
           onShowDialog={onShowDialog}
         />
-        { editable
-            ? (
-              <tooltip.IconButton
-                style={{ position: 'absolute', top: 20, right: 20 }}
-                className='btn-embed'
-                icon='refresh'
-                tooltip={t('Reload')}
-                onClick={this.refresh}
-              />
-            ) : null }
+        {editable
+          ? (
+            <tooltip.IconButton
+              style={{ position: 'absolute', top: 20, right: 20 }}
+              className='btn-embed'
+              icon='refresh'
+              tooltip={t('Reload')}
+              onClick={this.refresh}
+            />
+          ) : null}
       </div>
     );
   }
@@ -148,15 +156,16 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   private saveTheme = (variables: { [name: string]: string }) => {
     const { t } = this.props;
     this.saveThemeInternal(path.join(themePath(), this.props.currentTheme), variables)
-    .then(() => {
-      const { currentTheme } = this.props;
-      this.context.api.events.emit('select-theme', currentTheme);
-    })
-    .catch(err => this.context.api.showErrorNotification(t('Unable to save theme'), err,
-      // Theme directory should have been present at this point but was removed
-      //  by an external factor. This could be due to:
-      // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
-      { allowReport: (err as any).code !== 'ENOENT' }));
+      .then(() => {
+        const { currentTheme } = this.props;
+        this.nextState.isOldTheme = false;
+        this.context.api.events.emit('select-theme', currentTheme);
+      })
+      .catch(err => this.context.api.showErrorNotification(t('Unable to save theme'), err,
+        // Theme directory should have been present at this point but was removed
+        //  by an external factor. This could be due to:
+        // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
+        { allowReport: (err as any).code !== 'ENOENT' }));
   }
 
   private saveThemeInternal(outputPath: string, variables: { [name: string]: string }) {
@@ -176,21 +185,38 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       return;
     }
 
+    // Load variables from the variables.scss
     fs.readFileAsync(path.join(currentThemePath, 'variables.scss'))
-    .then(data => {
-      const variables = {};
-      data.toString('utf-8').split('\r\n').forEach(line => {
-        const [key, value] = line.split(':');
-        if (value !== undefined) {
-          variables[key.substr(1)] = value.trim().replace(/;*$/, '');
+      .then(data => {
+        const variables = {};
+        data.toString('utf-8').split('\r\n').forEach(line => {
+          const [key, value] = line.split(':');
+          if (value !== undefined) {
+            variables[key.substr(1)] = value.trim().replace(/;*$/, '');
+          }
+        });
+        // Check if it's a V1 theme 
+        const isV1Theme = Object.keys(variables).find((key) => key.indexOf('brand-') > -1)
+        if (isV1Theme) {
+          // If it's old theme, use the color default to generate the new variables
+          const newVars = COLOR_DEFAULTS.reduce((accumulator, curr) => { accumulator[curr.name] = curr.value; return accumulator }, {})
+          for (const key in newVars) {
+            const mapper = V1_TO_V2_MAP[key]
+            if (mapper) {
+              // Then using pSBC convert the old variables to new variables
+              newVars[key] = pSBC(mapper[1], variables[mapper[0]])
+            }
+          }
+          this.nextState.variables = newVars;
+        } else {
+          this.nextState.variables = variables;
         }
+        this.nextState.isOldTheme = !!isV1Theme
+      })
+      // an exception indicates no variables set. that's fine, defaults are used
+      .catch(() => {
+        this.nextState.variables = {};
       });
-      this.nextState.variables = variables;
-    })
-    // an exception indicates no variables set. that's fine, defaults are used
-    .catch(() => {
-      this.nextState.variables = {};
-    });
   }
 
   private onClone = () => {
@@ -231,39 +257,39 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
             return res;
           },
         }, [{ label: 'Cancel' }, { label: 'Clone' }]);
-    })
-    .then(res => {
-      if (res.action === 'Clone') {
-        if (res.input.name &&
+      })
+      .then(res => {
+        if (res.action === 'Clone') {
+          if (res.input.name &&
             (themes.findIndex(iter => path.basename(iter) === res.input.name) === -1)) {
-          const targetPath = path.join(themePath(), res.input.name);
-          const sourcePath = this.themePath(currentTheme);
-          return fs.ensureDirAsync(targetPath)
-            .then(() =>
-              this.saveThemeInternal(path.join(themePath(), res.input.name), this.state.variables))
-            .then(() => (sourcePath !== undefined)
-              ? fs.readdirAsync(sourcePath)
-              : Promise.resolve([]))
-            .map(files => fs.copyAsync(path.join(sourcePath, files), path.join(targetPath, files)))
-            .then(() => {
-              this.nextState.themes.push(targetPath);
-              this.selectThemeImpl(res.input.name);
-            })
-            .catch(err => this.context.api.showErrorNotification(
-              t('Failed to read theme directory'),
-              err,
-              // Theme directory has been removed by an external method -
-              // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
-              { allowReport: (err as any).code !== 'ENOENT' }));
-        } else {
-          this.clone(t('Name already used.'));
+            const targetPath = path.join(themePath(), res.input.name);
+            const sourcePath = this.themePath(currentTheme);
+            return fs.ensureDirAsync(targetPath)
+              .then(() =>
+                this.saveThemeInternal(path.join(themePath(), res.input.name), this.state.variables))
+              .then(() => (sourcePath !== undefined)
+                ? fs.readdirAsync(sourcePath)
+                : Promise.resolve([]))
+              .map(files => fs.copyAsync(path.join(sourcePath, files), path.join(targetPath, files)))
+              .then(() => {
+                this.nextState.themes.push(targetPath);
+                this.selectThemeImpl(res.input.name);
+              })
+              .catch(err => this.context.api.showErrorNotification(
+                t('Failed to read theme directory'),
+                err,
+                // Theme directory has been removed by an external method -
+                // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
+                { allowReport: (err as any).code !== 'ENOENT' }));
+          } else {
+            this.clone(t('Name already used.'));
+          }
         }
-      }
-      return Promise.resolve();
-    })
-    .catch(err => {
-      this.context.api.showErrorNotification('Failed to clone theme', err);
-    });
+        return Promise.resolve();
+      })
+      .catch(err => {
+        this.context.api.showErrorNotification('Failed to clone theme', err);
+      });
   }
 
   private remove = () => {
@@ -277,24 +303,24 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
         replace: { theme: currentTheme },
       }),
     }, [
-        { label: 'Cancel' },
-        {
-          label: 'Confirm',
-          action: () => {
-            this.selectThemeImpl('default');
-            const currentThemePath = this.themePath(currentTheme);
-            this.nextState.themes = this.state.themes
-              .filter(iter => iter !== currentThemePath);
-            fs.removeAsync(currentThemePath)
-              .then(() => {
-                log('info', 'removed theme', currentTheme);
-              })
-              .catch(err => {
-                log('error', 'failed to remove theme', { err });
-              });
-          },
+      { label: 'Cancel' },
+      {
+        label: 'Confirm',
+        action: () => {
+          this.selectThemeImpl('default');
+          const currentThemePath = this.themePath(currentTheme);
+          this.nextState.themes = this.state.themes
+            .filter(iter => iter !== currentThemePath);
+          fs.removeAsync(currentThemePath)
+            .then(() => {
+              log('info', 'removed theme', currentTheme);
+            })
+            .catch(err => {
+              log('error', 'failed to remove theme', { err });
+            });
+        },
       },
-      ]);
+    ]);
   }
 
   private selectTheme = (evt) => {
