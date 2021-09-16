@@ -211,8 +211,13 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
 
   public render(): JSX.Element {
     const { t, disabled } = this.props;
-    const { availableFonts, colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
+    const { colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
             fontSize, margin } = this.state;
+
+    const availableFonts = this.state.availableFonts.slice(0);
+    if (!availableFonts.includes(fontFamily)) {
+      availableFonts.push(fontFamily);
+    }
 
     const buckets: IColorEntry[][] = colorDefaults.reduce((prev, value, idx) => {
       if (idx < ThemeEditor.BUCKETS) {

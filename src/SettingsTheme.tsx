@@ -55,6 +55,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       .then(() => {
         this.updateVariables(this.props.currentTheme);
         this.nextState.editable = this.isCustom(this.props.currentTheme);
+        return [];
       })
       .catch(err => {
         log('error', 'failed to request list of fonts', err.message);
@@ -65,7 +66,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
           [
             'Roboto',
             'BebasNeue',
-            ...(fonts || []).map(font => font.family).sort(),
+            ...(fonts ?? []).map(font => font.family).sort(),
           ]));
       });
   }
