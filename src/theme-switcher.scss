@@ -3,3 +3,9 @@
   grid-template-columns: repeat(auto-fit,minmax(31rem,1fr));
   gap: 1rem;
 }
+
+.color-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(37rem,1fr));
+  gap: 1rem;
+}
