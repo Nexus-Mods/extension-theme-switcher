@@ -1,6 +1,6 @@
-import {remote} from 'electron';
 import * as path from 'path';
+import { util } from 'vortex-api';
 
 export function themePath(): string {
-  return path.join(remote.app.getPath('userData'), 'themes');
+  return path.join(util.getVortexPath('userData'), 'themes');
 }

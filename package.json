@@ -30,6 +30,7 @@
     "redux": "^3.7.2",
     "ts-loader": "4.4.2",
     "vortex-api": "Nexus-Mods/vortex-api",
-    "webpack": "^4.29.3"
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.3.10"
   }
 }
