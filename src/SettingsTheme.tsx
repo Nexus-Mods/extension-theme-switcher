@@ -195,6 +195,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   private onClone = () => {
+    this.context.api.events.emit('analytics-track-click-event', 'Themes', 'Clone theme');
     this.clone();
   }
 
@@ -299,6 +300,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   private selectTheme = (evt) => {
+    this.context.api.events.emit('analytics-track-click-event', 'Themes', 'Select theme');
     this.selectThemeImpl(evt.currentTarget.value);
   }
 
