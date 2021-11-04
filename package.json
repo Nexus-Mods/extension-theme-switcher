@@ -5,7 +5,7 @@
   "main": "./out/index.js",
   "scripts": {
     "tsc": "tsc -p .",
-    "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --display-error-details --progress --profile --color",
+    "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --stats-error-details --progress --profile --color",
     "copy_lib": "copyfiles -u 4 node_modules/font-scanner/build/Release/fontmanager.node dist",
     "copy_themes": "copyfiles themes/**/* dist",
     "build": "npm run webpack && npm run copy_lib && npm run copy_themes && extractInfo"
@@ -29,8 +29,8 @@
     "react-color": "^2.17.0",
     "redux": "^3.7.2",
     "ts-loader": "4.4.2",
-    "vortex-api": "Nexus-Mods/vortex-api",
-    "webpack": "^4.29.3",
-    "webpack-cli": "^3.3.10"
+    "vortex-api": "Nexus-Mods/vortex-api#mod-packs",
+    "webpack": "^5.61.0",
+    "webpack-cli": "^4.9.1"
   }
 }

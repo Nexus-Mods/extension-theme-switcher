@@ -7,6 +7,7 @@ import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
   Grid, OverlayTrigger, Panel, Popover, Row } from 'react-bootstrap';
 import { ChromePicker } from 'react-color';
 import { ComponentEx, fs, log, More, Toggle, types, util } from 'vortex-api';
+import { getAvailableFonts } from './util';
 
 interface IColor {
   r: number;
@@ -378,17 +379,8 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private readFont = () => {
-    const fontManager = require('font-scanner');
-    return fontManager.getAvailableFonts()
-      .then(fonts => {
-        this.nextState.availableFonts = Array.from(new Set<string>(
-          [
-            'Roboto',
-            'Montserrat',
-            'BebasNeue',
-            ...(fonts || []).map(font => font.family).sort(),
-          ]));
-      });
+    getAvailableFonts().then(fonts =>
+      this.nextState.availableFonts = fonts);
   }
 
   private renderEntry = (entry: IColorEntry, value: string) => {

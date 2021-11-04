@@ -1,9 +1,9 @@
 import settingsReducer from './reducers';
 import SettingsTheme from './SettingsTheme';
+import { themePath } from './util';
 
 import * as path from 'path';
 import { fs, types, util } from 'vortex-api';
-import { themePath } from './util';
 
 function applyTheme(api: types.IExtensionApi, theme: string, initial: boolean) {
   if (!initial) {
