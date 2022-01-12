@@ -197,9 +197,9 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
             variables[key.substr(1)] = value.trim().replace(/;*$/, '');
           }
         });
+        const themeEngineVersion = Number(variables['theme-engine-version'] ?? 1)
         // Check if it's a V1 theme 
-        const isV1Theme = Object.keys(variables).find((key) => key.indexOf('brand-') > -1)
-        if (isV1Theme) {
+        if (themeEngineVersion < 2) {
           // If it's old theme, use the color default to generate the new variables
           const newVars = COLOR_DEFAULTS.reduce((accumulator, curr) => { accumulator[curr.name] = curr.value; return accumulator }, {})
           for (const key in newVars) {
@@ -213,7 +213,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
         } else {
           this.nextState.variables = variables;
         }
-        this.nextState.isOldTheme = !!isV1Theme
+        this.nextState.isOldTheme = !!themeEngineVersion
       })
       // an exception indicates no variables set. that's fine, defaults are used
       .catch(() => {

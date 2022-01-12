@@ -10,6 +10,7 @@ import { ComponentEx, fs, log, More, Toggle, types, util } from 'vortex-api';
 import { COLOR_DEFAULTS, IColorEntry } from './defaults/colors.defaults';
 import { getAvailableFonts } from './util';
 
+const THEME_ENGINE_VERSION = 2
 interface IColor {
   r: number;
   g: number;
@@ -193,8 +194,13 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
 
   public render(): JSX.Element {
     const { t, disabled } = this.props;
-    const { availableFonts, colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
+    const { colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
             fontSize, margin } = this.state;
+
+    const availableFonts = this.state.availableFonts.slice(0);
+    if (!availableFonts.includes(fontFamily)) {
+      availableFonts.push(fontFamily);
+    }
 
     const buckets: IColorEntry[][] = COLOR_DEFAULTS.reduce((prev, value, idx) => {
       if (idx < ThemeEditor.BUCKETS) {
@@ -428,13 +434,22 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     }
     const theme: { [key: string]: string } = {
       ...this.state.colors,
-      'font-size-base': this.state.fontSize.toString() + 'px',
-      'hidpi-scale-factor': this.state.hidpiScale.toString() + '%',
-      'font-family-base': fontFamily,
+      'font-size-base':       this.state.fontSize.toString() + 'px',
+      'hidpi-scale-factor':   this.state.hidpiScale.toString() + '%',
+      'font-family-base':     fontFamily,
       'font-family-headings': '"' + this.state.fontFamilyHeadings + '"',
-      'gutter-width': this.state.margin.toString() + 'px',
-      'dashlet-height': `${this.state.dashletHeight}px`,
-      'dark-theme': this.state.dark ? 'true' : 'false',
+      'gutter-width':         this.state.margin.toString() + 'px',
+      'dashlet-height':       `${this.state.dashletHeight}px`,
+      'dark-theme':           this.state.dark ? 'true' : 'false',
+      'brand-primary':        '$primary',
+      'brand-highlight':      '$accent',
+      'brand-success':        '$success',
+      'brand-info':           '$accent',
+      'brand-warning':        '$warning',
+      'brand-danger':         '$danger',
+      'brand-bg':             '$background-secondary',
+      'brand-menu':           '$background-tertiary',
+      'theme-engine-version':  `${THEME_ENGINE_VERSION}`,
     };
     const grayNames = ['gray-lighter', 'gray-light', 'gray', 'gray-dark', 'gray-darker'];
     let grayColors = ['DEE2E6', 'DDDDDD', 'A9A9A9', '4C4C4C', '2A2C2B'];
