@@ -7,6 +7,7 @@ import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
   Grid, OverlayTrigger, Panel, Popover, Row } from 'react-bootstrap';
 import { ChromePicker } from 'react-color';
 import { ComponentEx, fs, log, More, Toggle, types, util } from 'vortex-api';
+import { COLOR_DEFAULTS, IColorEntry } from './defaults/colors.defaults';
 import { getAvailableFonts } from './util';
 
 interface IColor {
@@ -97,11 +98,6 @@ class ColorPreview extends React.Component<IColorProps, {}> {
   }
 }
 
-interface IColorEntry {
-  name: string;
-  value: string;
-}
-
 export interface IBaseProps {
   t: TFunction;
   themePath: string;
@@ -117,22 +113,6 @@ export interface IBaseProps {
 }
 
 type IProps = IBaseProps;
-
-const colorDefaults: IColorEntry[] = [
-  { name: 'brand-primary', value: '#D78F46' },
-  { name: 'brand-highlight', value: '#00C1FF' },
-  { name: 'brand-success', value: '#86B951' },
-  { name: 'brand-info', value: '#00C1FF' },
-  { name: 'brand-warning', value: '#FF7300' },
-  { name: 'brand-danger', value: '#FF1C38' },
-  { name: 'brand-bg', value: '#2A2C2B' },
-  { name: 'brand-menu', value: '#4C4C4C' },
-  { name: 'brand-secondary', value: '#D78F46' },
-  { name: 'brand-clickable', value: '#D78F46' },
-  { name: 'text-color', value: '#eeeeee' },
-  { name: 'text-color-disabled', value: '#bbbbbb' },
-  { name: 'link-color', value: '#D78F46' },
-];
 
 interface IComponentState {
   fontFamily: string;
@@ -216,7 +196,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     const { availableFonts, colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
             fontSize, margin } = this.state;
 
-    const buckets: IColorEntry[][] = colorDefaults.reduce((prev, value, idx) => {
+    const buckets: IColorEntry[][] = COLOR_DEFAULTS.reduce((prev, value, idx) => {
       if (idx < ThemeEditor.BUCKETS) {
         prev[idx % ThemeEditor.BUCKETS] = [];
       }
@@ -542,8 +522,8 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
 
   private setColors(theme: { [name: string]: string }) {
     this.nextState.colors = {};
-    colorDefaults.forEach(entry => {
-        if (colorDefaults.find(color => color.name === entry.name) !== undefined) {
+    COLOR_DEFAULTS.forEach(entry => {
+        if (COLOR_DEFAULTS.find(color => color.name === entry.name) !== undefined) {
             this.nextState.colors[entry.name] = theme[entry.name] || entry.value;
         }
     });
