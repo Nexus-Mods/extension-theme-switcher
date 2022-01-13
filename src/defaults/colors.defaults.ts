@@ -44,18 +44,18 @@ export const COLOR_DEFAULTS: IColorEntry[] = [
   { name: 'font-tertiary-light', value: '#b3b3b3' },
 ];
 
-export interface V1TOV2MAP {
+export interface IThemesV1ToThemesV2Map {
   /**
    * String is the old variablename, number is if pSBC will make that value darker on ligher
    */
-  [newStyleVar: string]: [string, number]
-};
+  [newStyleVar: string]: [string, number];
+}
 
-export const V1_TO_V2_MAP: V1TOV2MAP = {
-  'primary': ['brand-primary', 0],
+export const V1_TO_V2_MAP: IThemesV1ToThemesV2Map = {
+  primary: ['brand-primary', 0],
   'primary-darker': ['brand-secondary', -0.22],
   'primary-lighter': ['brand-primary', 0.22],
-  'secondary': ['brand-menu', 0],
+  secondary: ['brand-menu', 0],
   'secondary-darker': ['brand-menu', -0.22],
   'secondary-lighter': ['brand-menu', 0.22],
   // Ingores these three
@@ -67,16 +67,16 @@ export const V1_TO_V2_MAP: V1TOV2MAP = {
   'background-tertiary': ['brand-bg', -0.22],
   'content-primary': ['brand-menu', 0],
   'content-secondary': ['brand-menu', 0],
-  'error': ['brand-danger', 0],
+  error: ['brand-danger', 0],
   'error-darker': ['brand-danger', -0.22],
   'error-lighter': ['brand-danger', 0.22],
-  'warning': ['brand-warning', 0],
+  warning: ['brand-warning', 0],
   'warning-darker': ['brand-warning', -0.22],
   'warning-lighter': ['brand-warning', 0.22],
-  'success': ['brand-success', 0],
+  success: ['brand-success', 0],
   'success-darker': ['brand-success', -0.22],
   'success-lighter': ['brand-success', 0.22],
-  'accent': ['brand-highlight', 0],
+  accent: ['brand-highlight', 0],
   'accent-darker': ['brand-highlight', -0.22],
   'accent-lighter': ['brand-highlight', 0.22],
   // Ingores these two
@@ -88,4 +88,4 @@ export const V1_TO_V2_MAP: V1TOV2MAP = {
   'font-primary-light': ['text-color', 0],
   'font-secondary-light': ['text-color', 0.22],
   'font-tertiary-light': ['text-color', 0.33],
-}
+};

@@ -449,6 +449,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       'brand-danger':         '$danger',
       'brand-bg':             '$background-secondary',
       'brand-menu':           '$background-tertiary',
+      'text-color':           '$font-primary-dark',
       'theme-engine-version':  `${THEME_ENGINE_VERSION}`,
     };
     const grayNames = ['gray-lighter', 'gray-light', 'gray', 'gray-dark', 'gray-darker'];

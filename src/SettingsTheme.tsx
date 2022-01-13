@@ -47,7 +47,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
       availableFonts: [],
       variables: {},
       editable: false,
-      isOldTheme: false
+      isOldTheme: false,
     });
   }
 
@@ -197,23 +197,28 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
             variables[key.substr(1)] = value.trim().replace(/;*$/, '');
           }
         });
-        const themeEngineVersion = Number(variables['theme-engine-version'] ?? 1)
-        // Check if it's a V1 theme 
+        const themeEngineVersion = Number(variables['theme-engine-version'] ?? 1);
+        // Check if it's a V1 theme
         if (themeEngineVersion < 2) {
           // If it's old theme, use the color default to generate the new variables
-          const newVars = COLOR_DEFAULTS.reduce((accumulator, curr) => { accumulator[curr.name] = curr.value; return accumulator }, {})
+          const newVars = COLOR_DEFAULTS.reduce(
+            (accumulator, curr) => {
+              accumulator[curr.name] = curr.value;
+              return accumulator;
+            }, {},
+          );
           for (const key in newVars) {
-            const mapper = V1_TO_V2_MAP[key]
-            if (mapper) {
+            if (V1_TO_V2_MAP[key]) {
+              const mapper = V1_TO_V2_MAP[key];
               // Then using pSBC convert the old variables to new variables
-              newVars[key] = pSBC(mapper[1], variables[mapper[0]])
+              newVars[key] = pSBC(mapper[1], variables[mapper[0]]);
             }
           }
           this.nextState.variables = newVars;
         } else {
           this.nextState.variables = variables;
         }
-        this.nextState.isOldTheme = !!themeEngineVersion
+        this.nextState.isOldTheme = !!themeEngineVersion;
       })
       // an exception indicates no variables set. that's fine, defaults are used
       .catch(() => {
