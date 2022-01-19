@@ -5,11 +5,15 @@ export function themePath(): string {
   return path.join(util.getVortexPath('userData'), 'themes');
 }
 
-const getAvailableFonts = util['makeRemoteCall']('get-available-fonts',
+interface IFont {
+  family: string;
+}
+
+const getAvailableFonts: () => Promise<string[]> = util['makeRemoteCall']('get-available-fonts',
   () => {
     const fontScanner = require('font-scanner');
     return fontScanner.getAvailableFonts()
-      .then(fonts => Array.from(new Set<string>(
+      .then((fonts: IFont[]) => Array.from(new Set<string>(
         [
           'Roboto',
           'Montserrat',
