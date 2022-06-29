@@ -103,3 +103,9 @@
 #main-toolbar .nexus-main-banner .right-center {
     font-size: inherit;
 }
+
+#titlebar-starter {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(1, auto);
+}
