@@ -114,3 +114,9 @@
 .has-error .control-label {
   filter: brightness(200%);
 }
+
+#titlebar-starter {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(1, auto);
+}
