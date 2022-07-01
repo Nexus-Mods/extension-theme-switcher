@@ -109,12 +109,17 @@
   grid-auto-flow: column;
   grid-template-rows: repeat(1, auto);
 
-  .starter-tool-icon-container:last-child:nth-last-child(1):nth-child(even),
-  .starter-tool-icon-container:last-child:nth-last-child(1):nth-child(odd),
-  .starter-tool-icon-container:nth-child(odd),
-  .starter-tool-icon-container:nth-child(even),
-  .starter-tool-icon-container:nth-child(1),
-  .starter-tool-icon-container:nth-child(2) {
-    margin: 0.66em;
+  .starter-tool-icon-container:nth-child(odd) {
+    margin: 0.66em 0.33em 0.66em 0.33em !important;
+  }
+  .starter-tool-icon-container:nth-child(even) {
+    margin: 0.66em 0.33em 0.66em 0.33em !important;
+  }
+
+  .starter-tool-icon-container:last-child {
+    margin: 0.66em 0.66em 0.66em 0.33em !important;
+  }
+  .starter-tool-icon-container:first-child {
+    margin: 0.66em 0.33em 0.66em 0.66em !important;
   }
 }
