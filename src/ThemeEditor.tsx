@@ -1,13 +1,9 @@
-import Promise from 'bluebird';
-import {} from 'font-scanner';
-import I18next, { TFunction } from 'i18next';
-import * as path from 'path';
+import { TFunction } from 'i18next';
 import * as React from 'react';
 import { Button, Col, ControlLabel, Form, FormControl, FormGroup,
-  Grid, OverlayTrigger, Panel, Popover, Row } from 'react-bootstrap';
+         Grid, OverlayTrigger, Panel, Popover, Row } from 'react-bootstrap';
 import { ChromePicker } from 'react-color';
-import { ComponentEx, fs, log, More, Toggle, types, util } from 'vortex-api';
-import { getAvailableFonts } from './util';
+import { ComponentEx, More, Toggle } from 'vortex-api';
 
 interface IColor {
   r: number;
@@ -62,7 +58,7 @@ function renderColorBox(color: IColor): JSX.Element {
   );
 }
 
-class ColorPreview extends React.Component<IColorProps, {}> {
+class ColorPreview extends React.Component<IColorProps, never> {
   public render(): JSX.Element {
     const { color, disabled } = this.props;
     const popover = (
@@ -104,16 +100,12 @@ interface IColorEntry {
 
 export interface IBaseProps {
   t: TFunction;
-  themePath: string;
+  themeName: string;
   theme: { [name: string]: string };
   disabled: boolean;
   onApply: (updatedTheme: { [name: string]: string }) => void;
-  onShowDialog: (
-    type: types.DialogType,
-    title: string,
-    content: types.IDialogContent,
-    actions: types.DialogActions,
-  ) => Promise<types.IDialogResult>;
+  onEditStyle: (themeName: string) => void;
+  getAvailableFonts: () => Promise<string[]>;
 }
 
 type IProps = IBaseProps;
@@ -214,7 +206,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   public render(): JSX.Element {
     const { t, disabled } = this.props;
     const { colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
-            fontSize, margin } = this.state;
+      fontSize, margin } = this.state;
 
     const availableFonts = this.state.availableFonts.slice(0);
     if (!availableFonts.includes(fontFamily)) {
@@ -384,7 +376,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private readFont = () => {
-    getAvailableFonts().then(fonts =>
+    this.props.getAvailableFonts().then(fonts =>
       this.nextState.availableFonts = fonts);
   }
 
@@ -412,28 +404,12 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   }
 
   private editManually = () => {
-    const { disabled, onShowDialog, themePath } = this.props;
+    const { disabled, themeName } = this.props;
     if (disabled) {
       return;
     }
-    const stylePath = path.join(themePath, 'style.scss');
-    fs.ensureFileAsync(stylePath)
-      .then(() =>
-        util.opn(stylePath)
-          .catch(util.MissingInterpreter, (err) => {
-            onShowDialog('error', 'No handler found', {
-              text: 'You don\'t have an editor associated with scss files. '
-                  + 'You can fix this by opening the following file from your file explorer, '
-                  + 'pick your favorite text editor and when prompted, choose to always open '
-                  + 'that file type with that editor.',
-              message: err.url,
-            }, [
-              { label: 'Close' },
-            ]);
-          })
-          .catch(err => {
-            log('error', 'failed to open', err);
-          }));
+
+    this.props.onEditStyle(themeName);
   }
 
   private revert = () => {
@@ -548,9 +524,9 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
   private setColors(theme: { [name: string]: string }) {
     this.nextState.colors = {};
     colorDefaults.forEach(entry => {
-        if (colorDefaults.find(color => color.name === entry.name) !== undefined) {
-            this.nextState.colors[entry.name] = theme[entry.name] || entry.value;
-        }
+      if (colorDefaults.find(color => color.name === entry.name) !== undefined) {
+        this.nextState.colors[entry.name] = theme[entry.name] || entry.value;
+      }
     });
   }
 }

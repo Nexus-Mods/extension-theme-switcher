@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { util } from 'vortex-api';
 
-export function themePath(): string {
+export function themesPath(): string {
   return path.join(util.getVortexPath('userData'), 'themes');
 }
 

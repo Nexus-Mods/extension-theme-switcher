@@ -1,16 +1,27 @@
 import { selectTheme } from './actions';
 import ThemeEditor from './ThemeEditor';
-import { themePath } from './util';
 
-import Promise from 'bluebird';
-import * as path from 'path';
 import * as React from 'react';
 import { Alert, Button, ControlLabel, FormControl, FormGroup, InputGroup } from 'react-bootstrap';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import * as Redux from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { actions, ComponentEx, fs, log, tooltip, types, util } from 'vortex-api';
+import { actions, ComponentEx, log, tooltip, types, util } from 'vortex-api';
+
+export interface ISettingsThemeProps {
+  readThemes: () => Promise<string[]>;
+  onCloneTheme: (themeName: string, newName: string) => Promise<void>;
+  onSelectTheme: (themeName: string) => void;
+  onSaveTheme: (themeName: string, variables: { [name: string]: string }) => Promise<void>;
+  onRemoveTheme: (themeName: string) => Promise<void>;
+  readThemeVariables: (themeName: string) => Promise<{ [key: string]: string }>;
+  locationToName: (location: string) => string;
+  nameToLocation: (name: string) => string;
+  isThemeCustom: (themeName: string) => boolean;
+  onEditStyle: (themeName: string) => void;
+  getAvailableFonts: () => Promise<string[]>;
+}
 
 interface IConnectedProps {
   currentTheme: string;
@@ -24,12 +35,13 @@ interface IActionProps {
     content: types.IDialogContent,
     actions: types.DialogActions,
   ) => Promise<types.IDialogResult>;
+  onShowError: (title: string, details: any) => void;
 }
 
-type IProps = IConnectedProps & IActionProps;
+type IWrapperProps = ISettingsThemeProps & IConnectedProps & IActionProps;
+type IProps = Omit<ISettingsThemeProps, "readThemes"> & { themes: string[] } & IConnectedProps & IActionProps;
 
 interface IComponentState {
-  themes: string[];
   availableFonts: string[];
   variables: { [key: string]: string };
   editable: boolean;
@@ -40,7 +52,6 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     super(props);
 
     this.initState({
-      themes: [],
       availableFonts: [],
       variables: {},
       editable: false,
@@ -48,28 +59,15 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   public UNSAFE_componentWillMount() {
-    util.readExtensibleDir('theme', this.bundledPath, themePath())
-      .then(themePaths => {
-        this.nextState.themes = themePaths;
-      })
-      .then(() => {
-        this.updateVariables(this.props.currentTheme);
-        this.nextState.editable = this.isCustom(this.props.currentTheme);
-        return [];
-      })
-      .catch(err => {
-        log('error', 'failed to request list of fonts', err.message);
-        return [];
-      })
-      .then((fonts: any[]) => {
-        this.nextState.availableFonts = Array.from(new Set<string>(
-          [
-            'Roboto',
-            'BebasNeue',
-            'Montserrat',
-            ...(fonts ?? []).map(font => font.family).sort(),
-          ]));
-      });
+    this.nextState.availableFonts = Array.from(new Set<string>(
+      [
+        'Roboto',
+        'BebasNeue',
+        'Montserrat',
+      ]));
+
+    this.nextState.editable = this.isCustom(this.props.currentTheme);
+    return this.updateVariables(this.props.currentTheme);
   }
 
   public UNSAFE_componentWillReceiveProps(newProps: IProps) {
@@ -80,13 +78,13 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
   }
 
   public render(): JSX.Element {
-    const { t, currentTheme, onShowDialog } = this.props;
-    const { availableFonts, editable, themes, variables } = this.state;
+    const { t, currentTheme, themes } = this.props;
+    const { editable, variables } = this.state;
     return (
       <div style={{ position: 'relative' }}>
         <form>
           <FormGroup controlId='themeSelect'>
-              <ControlLabel>{t('Theme')}</ControlLabel>
+            <ControlLabel>{t('Theme')}</ControlLabel>
             <InputGroup style={{ width: 300 }}>
               <FormControl
                 componentClass='select'
@@ -94,7 +92,7 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
                 value={currentTheme}
               >
                 {themes.map(iter => {
-                  const theme = path.basename(iter);
+                  const theme = this.props.locationToName(iter);
                   return this.renderTheme(theme, theme);
                 })}
               </FormControl>
@@ -114,22 +112,23 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
         </form>
         <ThemeEditor
           t={t}
-          themePath={this.themePath(currentTheme)}
+          themeName={currentTheme}
           theme={variables}
           onApply={this.saveTheme}
           disabled={!editable}
-          onShowDialog={onShowDialog}
+          onEditStyle={this.props.onEditStyle}
+          getAvailableFonts={this.props.getAvailableFonts}
         />
-        { editable
-            ? (
-              <tooltip.IconButton
-                style={{ position: 'absolute', top: 20, right: 20 }}
-                className='btn-embed'
-                icon='refresh'
-                tooltip={t('Reload')}
-                onClick={this.refresh}
-              />
-            ) : null }
+        {editable
+          ? (
+            <tooltip.IconButton
+              style={{ position: 'absolute', top: 20, right: 20 }}
+              className='btn-embed'
+              icon='refresh'
+              tooltip={t('Reload')}
+              onClick={this.refresh}
+            />
+          ) : null}
       </div>
     );
   }
@@ -138,135 +137,72 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
     return <option key={key} value={key}>{name}</option>;
   }
 
-  private get bundledPath(): string {
-    return path.join(__dirname, 'themes');
-  }
-
   private refresh = () => {
     const { currentTheme } = this.props;
-    this.context.api.events.emit('select-theme', currentTheme);
+    this.props.onSelectTheme(currentTheme);
   }
 
   private saveTheme = (variables: { [name: string]: string }) => {
-    const { t } = this.props;
-    this.saveThemeInternal(path.join(themePath(), this.props.currentTheme), variables)
-    .then(() => {
-      const { currentTheme } = this.props;
-      this.context.api.events.emit('select-theme', currentTheme);
-    })
-    .catch(err => this.context.api.showErrorNotification(t('Unable to save theme'), err,
-      // Theme directory should have been present at this point but was removed
-      //  by an external factor. This could be due to:
-      // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
-      { allowReport: (err as any).code !== 'ENOENT' }));
+    const { currentTheme, onSaveTheme } = this.props;
+    onSaveTheme(currentTheme, variables);
   }
 
-  private saveThemeInternal(outputPath: string, variables: { [name: string]: string }) {
-    const theme = Object.keys(variables)
-      .map(name => `\$${name}: ${variables[name]};`);
-    return fs.writeFileAsync(path.join(outputPath, 'variables.scss'),
-      '// Automatically generated. Changes to this file will be overwritten.\r\n'
-      + theme.join('\r\n'));
-  }
-
-  private updateVariables(themeName: string) {
-    const currentThemePath = this.themePath(themeName);
-    if (currentThemePath === undefined) {
-      // likely was deleted outside Vortex
-      log('warn', 'theme not found', themeName);
-      this.nextState.variables = {};
-      return;
-    }
-
-    fs.readFileAsync(path.join(currentThemePath, 'variables.scss'))
-    .then(data => {
-      const variables = {};
-      data.toString('utf-8').split('\r\n').forEach(line => {
-        const [key, value] = line.split(':');
-        if (value !== undefined) {
-          variables[key.substr(1)] = value.trim().replace(/;*$/, '');
-        }
-      });
-      this.nextState.variables = variables;
-    })
-    // an exception indicates no variables set. that's fine, defaults are used
-    .catch(() => {
-      this.nextState.variables = {};
-    });
+  private async updateVariables(themeName: string) {
+    this.nextState.variables = await this.props.readThemeVariables(themeName);
   }
 
   private onClone = () => {
-    this.context.api.events.emit('analytics-track-click-event', 'Themes', 'Clone theme');
-    this.clone();
+    this.cloneTheme(this.props.currentTheme, this.props.themes);
   }
 
-  private clone = (error?: string) => {
-    const { t, currentTheme, onShowDialog } = this.props;
-    const { themes } = this.state;
+  private cloneTheme(themeName: string, themes: string[], error?: string) {
+    const { t, onCloneTheme } = this.props;
 
-    util.getNormalizeFunc(themePath())
-      .then(normalize => {
-        const existing = new Set(themes.map(theme => normalize(path.basename(theme))));
-        return onShowDialog('question', 'Enter a name', {
-          bbcode: error !== undefined ? `[color=red]${error}[/color]` : undefined,
-          input: [{
+    // note: In the past we used proper name normalization based on the file system themes are stored on,
+    //   meaning that on a case-sensitive file system (linux), we would have allowed two themes to be named
+    //   "same" and "SAME".
+    //   I don't feel like that's actually desireable - much less worth making the code more complex over
+    const existing = new Set(themes.map(theme => this.props.locationToName(theme).toUpperCase()));
+
+    return this.props.onShowDialog('question', 'Enter a name', {
+      bbcode: error !== undefined ? `[color=red]${t(error)}[/color]` : undefined,
+      input: [{
+        id: 'name',
+        placeholder: 'Theme Name',
+        value: themeName !== '__default' ? themeName : '',
+      }],
+      condition: (content: types.IDialogContent) => {
+        const res: types.IConditionResult[] = [];
+        const { value } = content.input?.[0] ?? {};
+        if ((value !== undefined) && (existing.has(value.toUpperCase()))) {
+          res.push({
             id: 'name',
-            placeholder: 'Theme Name',
-            value: currentTheme !== '__default' ? currentTheme : '',
-          }],
-          condition: (content: types.IDialogContent) => {
-            const res: types.IConditionResult[] = [];
-            const { value } = content.input[0];
-            if ((value !== undefined) && (existing.has(normalize(value)))) {
-              res.push({
-                id: 'name',
-                errorText: 'Name already used',
-                actions: ['Clone'],
-              });
-            }
-            if (!(util as any).isFilenameValid(value)) {
-              res.push({
-                id: 'name',
-                errorText: 'Invalid symbols in name',
-                actions: ['Clone'],
-              });
-            }
-            return res;
-          },
-        }, [{ label: 'Cancel' }, { label: 'Clone' }]);
-    })
-    .then(res => {
-      if (res.action === 'Clone') {
-        if (res.input.name &&
-            (themes.findIndex(iter => path.basename(iter) === res.input.name) === -1)) {
-          const targetPath = path.join(themePath(), res.input.name);
-          const sourcePath = this.themePath(currentTheme);
-          return fs.ensureDirAsync(targetPath)
-            .then(() =>
-              this.saveThemeInternal(path.join(themePath(), res.input.name), this.state.variables))
-            .then(() => (sourcePath !== undefined)
-              ? fs.readdirAsync(sourcePath)
-              : Promise.resolve([]))
-            .map(files => fs.copyAsync(path.join(sourcePath, files), path.join(targetPath, files)))
-            .then(() => {
-              this.nextState.themes.push(targetPath);
-              this.selectThemeImpl(res.input.name);
-            })
-            .catch(err => this.context.api.showErrorNotification(
-              t('Failed to read theme directory'),
-              err,
-              // Theme directory has been removed by an external method -
-              // (Anti Virus, manually removed by mistake, etc); this is not Vortex's fault.
-              { allowReport: (err as any).code !== 'ENOENT' }));
-        } else {
-          this.clone(t('Name already used.'));
+            errorText: 'Name already used',
+            actions: ['Clone'],
+          });
         }
-      }
-      return Promise.resolve();
-    })
-    .catch(err => {
-      this.context.api.showErrorNotification('Failed to clone theme', err);
-    });
+        if ((value !== undefined) && !util.isFilenameValid(value)) {
+          res.push({
+            id: 'name',
+            errorText: 'Invalid symbols in name',
+            actions: ['Clone'],
+          });
+        }
+        return res;
+      },
+    }, [{ label: 'Cancel' }, { label: 'Clone' }])
+      .then(res => {
+        if (res.action === 'Clone') {
+          return onCloneTheme(themeName, res.input.name);
+        }
+        return Promise.resolve();
+      })
+      .catch(err => {
+        if (err instanceof util.ArgumentInvalid) {
+          return this.cloneTheme(themeName, themes, err.message);
+        }
+        this.props.onShowError('Failed to clone theme', err);
+      });
   }
 
   private remove = () => {
@@ -280,61 +216,23 @@ class SettingsTheme extends ComponentEx<IProps, IComponentState> {
         replace: { theme: currentTheme },
       }),
     }, [
-        { label: 'Cancel' },
-        {
-          label: 'Confirm',
-          action: () => {
-            this.selectThemeImpl('default');
-            const currentThemePath = this.themePath(currentTheme);
-            this.nextState.themes = this.state.themes
-              .filter(iter => iter !== currentThemePath);
-            fs.removeAsync(currentThemePath)
-              .then(() => {
-                log('info', 'removed theme', currentTheme);
-              })
-              .catch(err => {
-                log('error', 'failed to remove theme', { err });
-              });
-          },
+      { label: 'Cancel' },
+      {
+        label: 'Confirm',
+        action: () => {
+          this.props.onRemoveTheme(currentTheme);
+        },
       },
-      ]);
+    ]);
   }
 
   private selectTheme = (evt) => {
     this.context.api.events.emit('analytics-track-click-event', 'Themes', 'Select theme');
-    this.selectThemeImpl(evt.currentTarget.value);
-  }
-
-  private selectThemeImpl(theme: string) {
-    this.props.onSelectTheme(theme);
-    this.context.api.events.emit('select-theme', theme);
-  }
-
-  private themePath = (themeName: string): string => {
-    const { themes } = this.state;
-    themeName = themeName.replace(/^__/, '');
-    return themes.find(theme => path.basename(theme) === themeName);
+    this.props.onSelectTheme(evt.currentTarget.value);
   }
 
   private isCustom = (themeName: string): boolean => {
-    const themeFilePath = this.themePath(themeName);
-    if (themeFilePath === undefined) {
-      // We don't have the filepath to this theme..
-      //  possibly a race condition ? if so, this should
-      //  clear up next time the state updates.
-      //  https://github.com/Nexus-Mods/Vortex/issues/7191
-      //
-      // the above issue was in the remove callback so the likely scenario is
-      // that that event was triggered twice and on the second time it was handled
-      // the theme is already gone.
-      return false;
-    }
-
-    // isChildPath plays a bit fast and loose when it comes to directory normalization
-    // if we don't pass in a normalizer, but that shouldn't be a problem here, the official
-    // themes are in the application folder and the themes are in APPDATA or ProgramData so
-    // upper/lower case shouldn't be that big of a deal
-    return util.isChildPath(themeFilePath, themePath());
+    return this.props.isThemeCustom(themeName);
   }
 }
 
@@ -344,17 +242,33 @@ function mapStateToProps(state: any): IConnectedProps {
   };
 }
 
-type Dispatch = ThunkDispatch<types.IState, null, Redux.Action>;
-
 function mapDispatchToProps(dispatch: ThunkDispatch<any, any, Redux.Action>): IActionProps {
   return {
     onSelectTheme: (theme: string) => dispatch(selectTheme(theme)),
+    onShowError: (title: string, details: any) => util.showError(dispatch, title, details),
     onShowDialog: (type, title, content, dialogActions) =>
       dispatch(actions.showDialog(type, title, content, dialogActions)),
   };
 }
 
+function SettingsThemeWrapper(props: IWrapperProps) {
+  const [themes, setThemes] = React.useState<string[]>(undefined);
+
+  React.useEffect(() => {
+    (async () => {
+      const result = await props.readThemes();
+      setThemes(result);
+    })();
+  }, []);
+
+  if (themes !== undefined) {
+    return <SettingsTheme {...props} themes={themes} />
+  }
+
+  return null;
+}
+
 export default
   withTranslation(['common'])(
     connect(mapStateToProps, mapDispatchToProps)(
-      SettingsTheme) as any) as React.ComponentClass<{}>;
+      SettingsThemeWrapper)) as React.ComponentClass<ISettingsThemeProps>;
