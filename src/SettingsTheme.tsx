@@ -28,7 +28,6 @@ interface IConnectedProps {
 }
 
 interface IActionProps {
-  onSelectTheme: (theme: string) => void;
   onShowDialog: (
     type: types.DialogType,
     title: string,
@@ -244,7 +243,6 @@ function mapStateToProps(state: any): IConnectedProps {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<any, any, Redux.Action>): IActionProps {
   return {
-    onSelectTheme: (theme: string) => dispatch(selectTheme(theme)),
     onShowError: (title: string, details: any) => util.showError(dispatch, title, details),
     onShowDialog: (type, title, content, dialogActions) =>
       dispatch(actions.showDialog(type, title, content, dialogActions)),
