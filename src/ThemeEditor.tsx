@@ -134,6 +134,7 @@ interface IComponentState {
   colors: { [key: string]: string };
   margin: number;
   dashletHeight: number;
+  titlebarRows: number;
   dark: boolean;
 
   availableFonts: string[];
@@ -147,6 +148,7 @@ const defaultTheme = {
   hidpiScale: 100,
   margin: 30,
   dashletHeight: 120,
+  titlebarRows: 2,
   dark: true,
 };
 
@@ -188,6 +190,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     this.setMargin(this.props.theme);
     this.setDashletHeight(this.props.theme);
     this.setDark(this.props.theme);
+    this.setTitlebarRows(this.props.theme);
   }
 
   public UNSAFE_componentWillReceiveProps(newProps: IProps) {
@@ -200,13 +203,14 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       this.setMargin(newProps.theme);
       this.setDashletHeight(newProps.theme);
       this.setDark(newProps.theme);
+      this.setTitlebarRows(this.props.theme);
     }
   }
 
   public render(): JSX.Element {
     const { t, disabled } = this.props;
     const { colors, dark, dashletHeight, fontFamily, fontFamilyHeadings,
-      fontSize, margin } = this.state;
+      fontSize, margin, titlebarRows } = this.state;
 
     const availableFonts = this.state.availableFonts.slice(0);
     if (!availableFonts.includes(fontFamily)) {
@@ -337,6 +341,24 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
               />
             </Col>
           </FormGroup>
+          <FormGroup>
+            <Col sm={4}>
+              <ControlLabel>
+                {t('Titlebar Rows:')} {titlebarRows}
+              </ControlLabel>
+            </Col>
+            <Col sm={8}>
+              <FormControl
+                type='range'
+                value={titlebarRows}
+                min={1}
+                max={3}
+                step={1}
+                onChange={this.onChangeTitlebarRows}
+                disabled={disabled}
+              />
+            </Col>
+          </FormGroup>
         </Form>
 
         <Panel>
@@ -420,6 +442,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
     this.setFontFamilyHeadings(this.props.theme);
     this.setMargin(this.props.theme);
     this.setDark(this.props.theme);
+    this.setTitlebarRows(this.props.theme);
   }
 
   private apply = () => {
@@ -436,6 +459,7 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       'gutter-width': this.state.margin.toString() + 'px',
       'dashlet-height': `${this.state.dashletHeight}px`,
       'dark-theme': this.state.dark ? 'true' : 'false',
+      'titlebar-rows': this.state.titlebarRows.toString(),
     };
     const grayNames = ['gray-lighter', 'gray-light', 'gray', 'gray-dark', 'gray-darker'];
     let grayColors = ['DEE2E6', 'DDDDDD', 'A9A9A9', '4C4C4C', '2A2C2B'];
@@ -474,6 +498,10 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
 
   private onChangeDashletHeight = evt => {
     this.nextState.dashletHeight = evt.currentTarget.value;
+  }
+
+  private onChangeTitlebarRows = evt => {
+    this.nextState.titlebarRows = evt.currentTarget.value;
   }
 
   private onChangeDark = newValue => {
@@ -519,6 +547,12 @@ class ThemeEditor extends ComponentEx<IProps, IComponentState> {
       ? theme['dark-theme'] === 'true'
       : defaultTheme.dark;
     this.nextState.dark = dark;
+  }
+
+  private setTitlebarRows(theme: { [name: string]: string }) {
+    if (theme['titlebar-rows'] !== undefined) {
+      this.nextState.titlebarRows = parseInt(theme['titlebar-rows'], 10);
+    }
   }
 
   private setColors(theme: { [name: string]: string }) {
