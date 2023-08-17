@@ -4,7 +4,7 @@ import { WithTranslation, withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import * as Redux from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { actions, ComponentEx, log, tooltip, types, util } from 'vortex-api';
+import { actions, ComponentEx, EmptyPlaceholder, Icon, log, tooltip, types, util } from 'vortex-api';
 
 export interface ISettingsDebugProps {
   readThemes: () => Promise<string[]>;
@@ -46,6 +46,7 @@ interface IComponentState {
   variables: { [key: string]: string };
   editable: boolean;
   lastUpdated: number;
+  iconList: string[];
 }
 
 class SettingsDebug extends ComponentEx<IProps, IComponentState> {
@@ -87,7 +88,8 @@ class SettingsDebug extends ComponentEx<IProps, IComponentState> {
       availableFonts: [],
       variables: {},
       editable: false,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
+      iconList: ['about', 'activate', 'add', 'announcements', 'archive', 'attention-required', 'author', 'auto-update', 'autosort-disabled', 'autosort-enabled', 'bookmark', 'browse', 'bug', 'categories', 'changelog', 'checkbox-checked', 'checkbox-unchecked', 'clipboard', 'clipboard-copy', 'clone', 'close', 'close-slim', 'collapse-all', 'collapse-overlay', 'collection', 'comments', 'completed', 'conflict', 'connection', 'contributor', 'corner-handle', 'dashboard', 'delete', 'deploy', 'deselect', 'details', 'dialog-error', 'dialog-info', 'dialog-question', 'disconnected', 'download', 'download-speed', 'drag-handle', 'edit', 'endorse-disabled', 'endorse-maybe', 'endorse-no', 'endorse-yes', 'executable', 'expand-all', 'expand-overlay', 'extension-render-failed', 'extensions', 'feedback', 'feedback-error', 'feedback-info', 'feedback-success', 'feedback-warning', 'filter', 'filter-dependencies', 'folder-add', 'folder-download', 'game', 'game-menu', 'ghost', 'groups', 'hide', 'highlight', 'highlight-conflict', 'highlight-flag', 'highlight-home', 'highlight-lab', 'highlight-map', 'highlight-patch', 'highlight-person', 'highlight-shield', 'highlight-temple', 'highlight-tool', 'highlight-ui', 'highlight-visuals', 'history', 'idea', 'import', 'in-progress', 'incompatible', 'input-cancel', 'input-confirm', 'inspect', 'install', 'launch', 'launch-application', 'launch-simple', 'layout-grid', 'layout-list', 'link', 'locked', 'logout', 'loot-sort', 'menu', 'merge', 'milestone', 'mods', 'nav-back', 'nav-forward', 'nexus', 'nexus-header', 'notifications', 'official', 'onoff', 'open-ext', 'open-in-browser', 'override', 'pane-left', 'pane-right', 'parse-failed', 'pause', 'placeholder-image', 'plugin-clean', 'plugin-cleaned', 'plugin-dont-clean', 'plugin-light', 'plugin-master', 'plugin-native', 'plugins', 'profile', 'purge', 'recover', 'refresh', 'remove', 'report', 'resume', 'riffle', 'sad', 'savegame', 'search', 'search-down', 'search-up', 'select-install', 'settings', 'show', 'showhide-down', 'showhide-left', 'showhide-right', 'showhide-up', 'smart', 'sort-down', 'sort-none', 'sort-up', 'spinner', 'spinner_new', 'start-install', 'stop', 'stroke', 'support', 'swap', 'tags', 'toggle-disabled', 'toggle-enabled', 'toggle-uninstalled', 'track', 'transfer', 'turn-s', 'undo', 'unlocked', 'user', 'video', 'warning', 'window-close', 'window-maximize', 'window-minimize', 'window-restore', 'workaround']
     });
     
     // create references ready
@@ -154,7 +156,11 @@ class SettingsDebug extends ComponentEx<IProps, IComponentState> {
 
   public render(): JSX.Element {
     const { t, currentTheme, themes } = this.props;
-    const { editable, variables, lastUpdated } = this.state;
+    const { editable, variables, lastUpdated, iconList } = this.state;
+    const debugIconStyle = {
+      width: "20px",
+      height: "20px"
+    };
 
     return (
       <Grid fluid key={lastUpdated}>
@@ -274,6 +280,42 @@ class SettingsDebug extends ComponentEx<IProps, IComponentState> {
             <h4>Subheading</h4>
             <p>asdasd</p>
           </Col>
+        </Row>
+
+        <Row>
+          <Col sm={4} md={4} lg={4}>
+            <h3>Icons</h3>
+
+            <p>asdasdasdfsd</p>
+              
+
+            <Table condensed>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Preview</th>
+                </tr>
+              </thead>
+              <tbody>
+
+
+              {iconList.map((icon) => (
+                <tr>
+                <td><pre>{icon}</pre></td>
+                <td><Icon name={icon} style={debugIconStyle} /></td>
+              </tr>
+              ))}
+
+                
+              </tbody>
+            </Table>
+
+            
+            
+
+          </Col>
+          <Col sm={4} md={4} lg={4}></Col>
+          <Col sm={4} md={4} lg={4} wrap=''></Col>
         </Row>
       </Grid>
     );

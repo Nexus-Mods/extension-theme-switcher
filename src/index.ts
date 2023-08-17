@@ -1,6 +1,7 @@
 import * as ops from './operations';
 import settingsReducer from './reducers';
 import SettingsTheme from './SettingsTheme';
+import SettingsDebug from './SettingsDebug';
 import { getAvailableFonts, themesPath } from './util';
 
 import * as path from 'path';
@@ -73,6 +74,20 @@ function init(context: types.IExtensionContext) {
   const onEditStyle = (themeName: string) => editStyle(context.api, themeName);
 
   context.registerSettings('Theme', SettingsTheme, () => ({
+    readThemes: ops.readThemes,
+    onCloneTheme,
+    onSelectTheme,
+    readThemeVariables: ops.readThemeVariables,
+    onSaveTheme: saveTheme,
+    onRemoveTheme: removeTheme,
+    locationToName: ops.themeName,
+    nameToLocation: ops.themePath,
+    isThemeCustom: ops.isThemeCustom,
+    onEditStyle,
+    getAvailableFonts,
+  }));
+
+  context.registerSettings('Debug', SettingsDebug, () => ({
     readThemes: ops.readThemes,
     onCloneTheme,
     onSelectTheme,
