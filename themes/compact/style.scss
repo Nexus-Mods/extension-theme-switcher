@@ -89,6 +89,16 @@
     margin-bottom: auto;
     margin-right: 146px;
     border-right: $border-width solid $border-color;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    padding-left: 16px;
+
+    .toolbar-version {
+      position: static;
+      margin-right: 12px;
+    }
 }
 
 #main-toolbar .nexus-main-banner div {
