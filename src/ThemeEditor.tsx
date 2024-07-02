@@ -143,8 +143,8 @@ interface IComponentState {
 const defaultTheme = {
   colors: {},
   fontSize: 12,
-  fontFamily: 'Roboto',
-  fontFamilyHeadings: 'Montserrat',
+  fontFamily: 'Inter',
+  fontFamilyHeadings: 'Inter',
   hidpiScale: 100,
   margin: 30,
   dashletHeight: 120,
@@ -153,6 +153,7 @@ const defaultTheme = {
 };
 
 const standardFonts: string[] = [
+  'Inter',
   'Roboto',
   'Montserrat',
   'BebasNeue',
