@@ -15,6 +15,7 @@ const getAvailableFontImpl = () => {
   return fontScanner.getAvailableFonts()
     .then((fonts: IFont[]) => Array.from(new Set<string>(
       [
+        'Inter',
         'Roboto',
         'Montserrat',
         'BebasNeue',

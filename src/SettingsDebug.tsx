@@ -109,6 +109,7 @@ class SettingsDebug extends ComponentEx<IProps, IComponentState> {
   public UNSAFE_componentWillMount() {
     this.nextState.availableFonts = Array.from(new Set<string>(
       [
+        'Inter',
         'Roboto',
         'BebasNeue',
         'Montserrat',
